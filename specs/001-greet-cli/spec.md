@@ -9,7 +9,7 @@
 
 ### User Story 1 - Basic Multilingual Greeting Display (Priority: P1)
 
-As a user, I want to run the `greet` command and see "Hello, World!" displayed in multiple languages (English, French, Spanish, German, Japanese, Mandarin Chinese, Arabic, Hindi, Swahili, and Portuguese) with large ASCII art banners showing each language name, so I can enjoy a visually appealing multilingual greeting experience.
+As a user, I want to run the `greet` command and see "Hello, World!" displayed in multiple languages (English, French, Spanish, German, Japanese, Mandarin, Arabic, Hindi, Swahili, and Portuguese) with large ASCII art banners showing each language name, so I can enjoy a visually appealing multilingual greeting experience.
 
 **Why this priority**: This is the core functionality that defines the tool's purpose. Without multilingual greetings and ASCII art banners, there is no product.
 
@@ -177,7 +177,7 @@ As a user, I want to draw a decorative Unicode box around each greeting using `-
 
 ### Functional Requirements
 
-- **FR-001**: System MUST display "Hello, World!" greetings in at least 10 languages: English, French, Spanish, German, Japanese, Mandarin Chinese, Arabic, Hindi, Swahili, and Portuguese
+- **FR-001**: System MUST display "Hello, World!" greetings in at least 10 languages: English, French, Spanish, German, Japanese, Mandarin, Arabic, Hindi, Swahili, and Portuguese
 - **FR-002**: System MUST display authentic, culturally-correct greetings for each language (e.g., "Bonjour, le monde!", "¡Hola, Mundo!", "こんにちは、世界！")
 - **FR-003**: System MUST display ASCII art banners showing language names in figlet-style text before each greeting (when not disabled)
 - **FR-004**: System MUST support `--languages / -l` option accepting a comma-separated list of language names to filter output
@@ -201,7 +201,7 @@ As a user, I want to draw a decorative Unicode box around each greeting using `-
 - **Language**: Represents a supported language with its name, greeting template, country flag emoji, and display name for ASCII banner
 - **Greeting**: A formatted greeting combining language template with optional custom name substitution
 - **Proverb/Fortune**: A multilingual saying or proverb with its language of origin
-- **OutputMode**: Configuration combining selected display options (figlet, color, animation, layout)
+- **OutputConfig**: Configuration combining selected display options (figlet, color, animation, layout)
 
 ## Success Criteria *(mandatory)*
 
