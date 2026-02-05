@@ -18,5 +18,6 @@ cp /workspaces/maverick/.env "${SCRIPT_DIR}/.env"
 cd "${SCRIPT_DIR}"
 "${MAVERICK_BIN}" init --no-detect --type python --force
 
-# Run the feature workflow
-"${MAVERICK_BIN}" fly feature -i branch_name=001-greet-cli
+# Run the feature workflow with session logging
+"${MAVERICK_BIN}" fly feature -i branch_name=001-greet-cli \
+  --session-log "${SCRIPT_DIR}/session.jsonl"
