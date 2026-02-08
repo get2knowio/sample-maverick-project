@@ -10,12 +10,42 @@ SPEC_DIR="${REPO_ROOT}/specs/001-greet-cli"
 echo "=== Listing refuel-speckit workflow steps ==="
 "${MAVERICK_BIN}" refuel speckit "${SPEC_DIR}" --list-steps
 
-# 2. Run the refuel-speckit workflow in dry-run mode
-#    (creates synthetic bead IDs, wires dependencies, no bd CLI needed)
+# 2. Dry-run (shows execution plan, no bd required)
 echo ""
 echo "=== Running refuel-speckit workflow (dry-run) ==="
-"${MAVERICK_BIN}" refuel speckit "${SPEC_DIR}" --dry-run \
+"${MAVERICK_BIN}" refuel speckit "${SPEC_DIR}" --dry-run
+
+# 3. Live run (preflight validates bd, creates real beads)
+echo ""
+echo "=== Running refuel-speckit workflow (live) ==="
+"${MAVERICK_BIN}" refuel speckit "${SPEC_DIR}" \
   --session-log "${REPO_ROOT}/refuel-session.jsonl"
 
+# 4. Verify bead creation
 echo ""
-echo "=== refuel-speckit dry-run completed successfully ==="
+echo "=== Verifying bead creation ==="
+BEADS_JSON=$(bd list --json)
+EPIC_COUNT=$(echo "${BEADS_JSON}" | jq '[.[] | select(.type == "epic")] | length')
+TASK_COUNT=$(echo "${BEADS_JSON}" | jq '[.[] | select(.type == "task")] | length')
+echo "  Epics: ${EPIC_COUNT}"
+echo "  Tasks: ${TASK_COUNT}"
+[[ "${EPIC_COUNT}" -ge 1 ]] || { echo "FAIL: No epic bead created"; exit 1; }
+[[ "${TASK_COUNT}" -ge 1 ]] || { echo "FAIL: No task beads created"; exit 1; }
+
+# 5. Verify dependency graph
+echo ""
+echo "=== Dependency tree ==="
+bd dep-tree
+
+# 6. Verify ready/blocked status
+echo ""
+echo "=== Structural dependency verification ==="
+READY_COUNT=$(bd ready --json | jq 'length')
+BLOCKED_COUNT=$(bd blocked --json | jq 'length')
+echo "  Ready (unblocked): ${READY_COUNT}"
+echo "  Blocked: ${BLOCKED_COUNT}"
+[[ "${READY_COUNT}" -ge 1 ]]   || { echo "FAIL: No ready beads"; exit 1; }
+[[ "${BLOCKED_COUNT}" -ge 1 ]] || { echo "FAIL: No blocked beads"; exit 1; }
+
+echo ""
+echo "=== All verifications passed ==="
