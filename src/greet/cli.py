@@ -51,7 +51,15 @@ from greet.output import create_console, render_all_greetings, render_greeting
     default="World",
     help="Name to substitute in greetings (default: 'World')",
 )
-def main(languages: str | None, no_figlet: bool, no_color: bool, random: bool, name: str) -> None:
+@click.option(
+    "--cowsay",
+    is_flag=True,
+    default=False,
+    help="Wrap output in a cowsay-style speech bubble",
+)
+def main(
+    languages: str | None, no_figlet: bool, no_color: bool, random: bool, name: str, cowsay: bool
+) -> None:
     """Multilingual greeting CLI tool.
 
     Display "Hello, World!" in multiple languages with ASCII art flourishes.
@@ -87,6 +95,7 @@ def main(languages: str | None, no_figlet: bool, no_color: bool, random: bool, n
         show_figlet=not no_figlet,
         use_color=not no_color,
         random_mode=random,
+        cowsay=cowsay,
     )
 
     # Create console

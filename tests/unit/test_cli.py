@@ -308,3 +308,64 @@ def test_cli_name_option_all_languages() -> None:
     assert result.exit_code == 0
     # Should contain Everyone in at least one greeting
     assert "Everyone" in result.output
+
+
+def test_cli_cowsay_flag() -> None:
+    """Test that --cowsay wraps output in speech bubble."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--cowsay"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain bubble borders
+    assert "_" in result.output or "-" in result.output
+    # Should contain ASCII cow
+    assert "(oo)" in result.output or "^__^" in result.output
+
+
+def test_cli_cowsay_with_random() -> None:
+    """Test that --cowsay works with --random flag."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--cowsay", "--random"])
+    assert result.exit_code == 0
+    # Should contain bubble borders
+    assert "_" in result.output or "-" in result.output
+    # Should contain ASCII cow
+    assert "(oo)" in result.output or "^__^" in result.output
+    # Should be shorter than all languages (random shows just one)
+    result_all = runner.invoke(main)
+    assert len(result.output) < len(result_all.output) / 2
+
+
+def test_cli_cowsay_with_no_figlet() -> None:
+    """Test that --cowsay works with --no-figlet."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--cowsay", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain bubble and cow
+    assert "(oo)" in result.output
+
+
+def test_cli_cowsay_with_name() -> None:
+    """Test that --cowsay works with --name option."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "french", "--cowsay", "--name", "Marie"])
+    assert result.exit_code == 0
+    # Should contain personalized greeting
+    assert "Bonjour, Marie !" in result.output
+    # Should contain bubble and cow
+    assert "(oo)" in result.output
+
+
+def test_cli_cowsay_with_multiple_languages() -> None:
+    """Test that --cowsay wraps multiple languages."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english,french", "--cowsay"])
+    assert result.exit_code == 0
+    # Should contain both greetings
+    assert "Hello, World!" in result.output
+    assert "Bonjour" in result.output
+    # Should contain bubble and cow
+    assert "(oo)" in result.output
