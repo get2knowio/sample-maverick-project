@@ -21,7 +21,7 @@ def test_create_console_without_color() -> None:
     config = OutputConfig(use_color=False)
     console = create_console(config)
     assert isinstance(console, Console)
-    assert not console._force_terminal  # type: ignore[attr-defined]
+    assert not console._force_terminal
 
 
 def test_render_greeting_basic() -> None:
