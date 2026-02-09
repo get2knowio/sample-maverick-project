@@ -1,6 +1,6 @@
 """Tests for greet.languages module."""
 
-from greet.languages import LANGUAGES, Language
+from greet.languages import LANGUAGES, Language, get_language_by_name
 
 
 def test_language_dataclass_creation() -> None:
@@ -84,3 +84,61 @@ def test_all_languages_have_non_empty_fields() -> None:
         assert lang.banner_name, f"{lang.name} has empty banner_name"
         assert lang.greeting_template, f"{lang.name} has empty greeting_template"
         assert lang.flag_emoji, f"{lang.name} has empty flag_emoji"
+
+
+def test_get_language_by_name_exact_match() -> None:
+    """Test get_language_by_name with exact case match."""
+    lang = get_language_by_name("English")
+    assert lang is not None
+    assert lang.name == "English"
+    assert lang.code == "en"
+
+
+def test_get_language_by_name_lowercase() -> None:
+    """Test get_language_by_name with lowercase input."""
+    lang = get_language_by_name("english")
+    assert lang is not None
+    assert lang.name == "English"
+    assert lang.code == "en"
+
+
+def test_get_language_by_name_uppercase() -> None:
+    """Test get_language_by_name with uppercase input."""
+    lang = get_language_by_name("FRENCH")
+    assert lang is not None
+    assert lang.name == "French"
+    assert lang.code == "fr"
+
+
+def test_get_language_by_name_mixed_case() -> None:
+    """Test get_language_by_name with mixed case input."""
+    lang = get_language_by_name("SpAnIsH")
+    assert lang is not None
+    assert lang.name == "Spanish"
+    assert lang.code == "es"
+
+
+def test_get_language_by_name_not_found() -> None:
+    """Test get_language_by_name returns None for invalid language."""
+    lang = get_language_by_name("klingon")
+    assert lang is None
+
+
+def test_get_language_by_name_all_languages() -> None:
+    """Test get_language_by_name works for all supported languages."""
+    expected_names = [
+        "English",
+        "French",
+        "Spanish",
+        "German",
+        "Japanese",
+        "Mandarin",
+        "Arabic",
+        "Hindi",
+        "Swahili",
+        "Portuguese",
+    ]
+    for name in expected_names:
+        lang = get_language_by_name(name)
+        assert lang is not None, f"Could not find language: {name}"
+        assert lang.name == name

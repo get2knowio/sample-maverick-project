@@ -69,7 +69,7 @@ LANGUAGES: list[Language] = [
         code="ar",
         name="Arabic",
         banner_name="ARABIC",
-        greeting_template="مرحبا، {name}!",
+        greeting_template="مرحبا،{name}!",
         flag_emoji="🇸🇦",
     ),
     Language(
@@ -94,3 +94,19 @@ LANGUAGES: list[Language] = [
         flag_emoji="🇧🇷",
     ),
 ]
+
+
+def get_language_by_name(name: str) -> Language | None:
+    """Look up a language by name (case-insensitive).
+
+    Args:
+        name: The language name to search for (case-insensitive)
+
+    Returns:
+        The matching Language object, or None if not found
+    """
+    name_lower = name.lower()
+    for lang in LANGUAGES:
+        if lang.name.lower() == name_lower:
+            return lang
+    return None

@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from greet.languages import LANGUAGES, Language
+from greet.languages import LANGUAGES, Language, get_language_by_name
 
 
 @dataclass(frozen=True)
@@ -67,6 +67,38 @@ def generate_greeting(language: Language, name: str) -> Greeting:
     return Greeting(language=language, text=text, banner="")
 
 
+def parse_language_filter(language_string: str) -> list[str]:
+    """Parse comma-separated language names from a string.
+
+    Args:
+        language_string: Comma-separated language names (e.g., "english,french,spanish")
+
+    Returns:
+        List of language names with whitespace stripped
+    """
+    if not language_string:
+        return []
+    return [lang.strip() for lang in language_string.split(",")]
+
+
+def filter_languages(language_names: list[str]) -> list[Language]:
+    """Filter LANGUAGES list to only specified language names.
+
+    Args:
+        language_names: List of language names (case-insensitive)
+
+    Returns:
+        List of Language objects matching the specified names, in the order specified.
+        Invalid language names are silently ignored.
+    """
+    result: list[Language] = []
+    for name in language_names:
+        lang = get_language_by_name(name)
+        if lang is not None:
+            result.append(lang)
+    return result
+
+
 def generate_all_greetings(
     languages: list[str] | None = None, name: str = "World"
 ) -> list[Greeting]:
@@ -85,12 +117,7 @@ def generate_all_greetings(
         selected_languages = LANGUAGES
     else:
         # Filter languages by name (case-insensitive)
-        language_map = {lang.name.lower(): lang for lang in LANGUAGES}
-        selected_languages = []
-        for lang_name in languages:
-            lang_lower = lang_name.lower()
-            if lang_lower in language_map:
-                selected_languages.append(language_map[lang_lower])
+        selected_languages = filter_languages(languages)
 
     # Generate greeting for each selected language
     return [generate_greeting(lang, name) for lang in selected_languages]

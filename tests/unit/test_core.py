@@ -2,7 +2,14 @@
 
 import pytest
 
-from greet.core import Greeting, OutputConfig, generate_all_greetings, generate_greeting
+from greet.core import (
+    Greeting,
+    OutputConfig,
+    filter_languages,
+    generate_all_greetings,
+    generate_greeting,
+    parse_language_filter,
+)
 from greet.languages import LANGUAGES, Language
 
 
@@ -228,3 +235,86 @@ def test_generate_all_greetings_none_filter() -> None:
     """Test that None filter returns all languages."""
     greetings = generate_all_greetings(languages=None)
     assert len(greetings) == len(LANGUAGES)
+
+
+def test_parse_language_filter_single() -> None:
+    """Test parsing single language from comma-separated string."""
+    languages = parse_language_filter("english")
+    assert languages == ["english"]
+
+
+def test_parse_language_filter_multiple() -> None:
+    """Test parsing multiple languages from comma-separated string."""
+    languages = parse_language_filter("english,french,spanish")
+    assert languages == ["english", "french", "spanish"]
+
+
+def test_parse_language_filter_with_spaces() -> None:
+    """Test parsing languages with spaces around commas."""
+    languages = parse_language_filter("english, french , spanish")
+    assert languages == ["english", "french", "spanish"]
+
+
+def test_parse_language_filter_empty_string() -> None:
+    """Test parsing empty string returns empty list."""
+    languages = parse_language_filter("")
+    assert languages == []
+
+
+def test_parse_language_filter_preserves_case() -> None:
+    """Test that parse_language_filter preserves input case."""
+    languages = parse_language_filter("English,FRENCH,SpAnIsH")
+    assert languages == ["English", "FRENCH", "SpAnIsH"]
+
+
+def test_filter_languages_single_valid() -> None:
+    """Test filtering to single valid language."""
+    languages = filter_languages(["english"])
+    assert len(languages) == 1
+    assert languages[0].name == "English"
+
+
+def test_filter_languages_multiple_valid() -> None:
+    """Test filtering to multiple valid languages."""
+    languages = filter_languages(["french", "spanish"])
+    assert len(languages) == 2
+    names = {lang.name for lang in languages}
+    assert names == {"French", "Spanish"}
+
+
+def test_filter_languages_case_insensitive() -> None:
+    """Test filtering is case insensitive."""
+    languages1 = filter_languages(["ENGLISH"])
+    languages2 = filter_languages(["English"])
+    languages3 = filter_languages(["english"])
+    assert len(languages1) == len(languages2) == len(languages3) == 1
+    assert languages1[0].name == languages2[0].name == languages3[0].name == "English"
+
+
+def test_filter_languages_invalid_ignored() -> None:
+    """Test that invalid languages are ignored."""
+    languages = filter_languages(["english", "klingon", "french"])
+    assert len(languages) == 2
+    names = {lang.name for lang in languages}
+    assert names == {"English", "French"}
+
+
+def test_filter_languages_all_invalid() -> None:
+    """Test that all invalid languages returns empty list."""
+    languages = filter_languages(["klingon", "vulcan"])
+    assert len(languages) == 0
+
+
+def test_filter_languages_empty_list() -> None:
+    """Test that empty list returns empty result."""
+    languages = filter_languages([])
+    assert len(languages) == 0
+
+
+def test_filter_languages_preserves_order() -> None:
+    """Test that filter_languages preserves input order."""
+    languages = filter_languages(["spanish", "english", "french"])
+    assert len(languages) == 3
+    assert languages[0].name == "Spanish"
+    assert languages[1].name == "English"
+    assert languages[2].name == "French"

@@ -74,3 +74,84 @@ def test_cli_exit_code_on_success() -> None:
     runner = CliRunner()
     result = runner.invoke(main)
     assert result.exit_code == 0
+
+
+def test_cli_languages_option_single() -> None:
+    """Test --languages option with single language."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--languages", "english"])
+    assert result.exit_code == 0
+    assert "Hello, World!" in result.output
+    # Should not contain other languages
+    assert "Bonjour" not in result.output
+
+
+def test_cli_languages_short_option_single() -> None:
+    """Test -l short option with single language."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "french"])
+    assert result.exit_code == 0
+    assert "Bonjour" in result.output
+    # Should not contain other languages
+    assert "Hello, World!" not in result.output
+
+
+def test_cli_languages_option_multiple() -> None:
+    """Test --languages option with multiple languages."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--languages", "french,spanish"])
+    assert result.exit_code == 0
+    assert "Bonjour" in result.output
+    assert "Hola" in result.output
+    # Should not contain other languages
+    assert "Hello, World!" not in result.output
+    assert "Hallo" not in result.output
+
+
+def test_cli_languages_option_case_insensitive() -> None:
+    """Test --languages option is case insensitive."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "FRENCH"])
+    assert result.exit_code == 0
+    assert "Bonjour" in result.output
+
+
+def test_cli_languages_option_with_spaces() -> None:
+    """Test --languages option with spaces around commas."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "french, spanish"])
+    assert result.exit_code == 0
+    assert "Bonjour" in result.output
+    assert "Hola" in result.output
+
+
+def test_cli_invalid_language_shows_error() -> None:
+    """Test that invalid language shows helpful error message."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "klingon"])
+    assert result.exit_code == 2
+    assert "Invalid language" in result.output or "invalid language" in result.output
+    # Should list valid options
+    assert "English" in result.output or "english" in result.output
+
+
+def test_cli_partial_invalid_languages_shows_error() -> None:
+    """Test that partial invalid languages shows error for all invalid ones."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english,klingon,french"])
+    assert result.exit_code == 2
+    assert "klingon" in result.output.lower()
+
+
+def test_cli_all_invalid_languages_shows_error() -> None:
+    """Test that all invalid languages shows error."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "klingon,vulcan"])
+    assert result.exit_code == 2
+
+
+def test_cli_invalid_language_exit_code() -> None:
+    """Test that invalid language returns exit code 2."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--languages", "notareallanguage"])
+    assert result.exit_code == 2
