@@ -2,8 +2,8 @@
 
 import pytest
 
-from greet.core import Greeting, OutputConfig, generate_greeting
-from greet.languages import Language
+from greet.core import Greeting, OutputConfig, generate_all_greetings, generate_greeting
+from greet.languages import LANGUAGES, Language
 
 
 def test_output_config_default_values() -> None:
@@ -155,3 +155,76 @@ def test_generate_greeting_unicode_characters() -> None:
     )
     greeting = generate_greeting(lang, "世界")
     assert greeting.text == "こんにちは、世界！"
+
+
+def test_generate_all_greetings_default_name() -> None:
+    """Test generating all greetings with default name."""
+    greetings = generate_all_greetings()
+    # Should return greeting for each language in LANGUAGES
+    assert len(greetings) == len(LANGUAGES)
+    # Each greeting should have "World" as the name
+    assert all("World" in g.text or "Mundo" in g.text or "世界" in g.text for g in greetings)
+    # Should contain all language objects
+    lang_codes = {g.language.code for g in greetings}
+    expected_codes = {lang.code for lang in LANGUAGES}
+    assert lang_codes == expected_codes
+
+
+def test_generate_all_greetings_custom_name() -> None:
+    """Test generating all greetings with custom name."""
+    greetings = generate_all_greetings(name="Alice")
+    assert len(greetings) == len(LANGUAGES)
+    # Should contain Alice in the greetings
+    assert any("Alice" in g.text for g in greetings)
+
+
+def test_generate_all_greetings_language_filter_single() -> None:
+    """Test generating greetings filtered to single language."""
+    greetings = generate_all_greetings(languages=["english"])
+    assert len(greetings) == 1
+    assert greetings[0].language.code == "en"
+    assert greetings[0].text == "Hello, World!"
+
+
+def test_generate_all_greetings_language_filter_multiple() -> None:
+    """Test generating greetings filtered to multiple languages."""
+    greetings = generate_all_greetings(languages=["french", "spanish"])
+    assert len(greetings) == 2
+    codes = {g.language.code for g in greetings}
+    assert codes == {"fr", "es"}
+
+
+def test_generate_all_greetings_case_insensitive_filter() -> None:
+    """Test that language filter is case insensitive."""
+    greetings1 = generate_all_greetings(languages=["ENGLISH"])
+    greetings2 = generate_all_greetings(languages=["English"])
+    greetings3 = generate_all_greetings(languages=["english"])
+    assert len(greetings1) == len(greetings2) == len(greetings3) == 1
+    assert greetings1[0].language.code == greetings2[0].language.code == greetings3[0].language.code
+
+
+def test_generate_all_greetings_invalid_language() -> None:
+    """Test that invalid language names are ignored."""
+    greetings = generate_all_greetings(languages=["english", "klingon", "french"])
+    # Should only include valid languages (english and french)
+    assert len(greetings) == 2
+    codes = {g.language.code for g in greetings}
+    assert codes == {"en", "fr"}
+
+
+def test_generate_all_greetings_all_invalid_languages() -> None:
+    """Test that all invalid languages returns empty list."""
+    greetings = generate_all_greetings(languages=["klingon", "vulcan"])
+    assert len(greetings) == 0
+
+
+def test_generate_all_greetings_empty_language_list() -> None:
+    """Test that empty language list returns empty greetings."""
+    greetings = generate_all_greetings(languages=[])
+    assert len(greetings) == 0
+
+
+def test_generate_all_greetings_none_filter() -> None:
+    """Test that None filter returns all languages."""
+    greetings = generate_all_greetings(languages=None)
+    assert len(greetings) == len(LANGUAGES)

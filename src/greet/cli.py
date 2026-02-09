@@ -1,8 +1,12 @@
 """Click CLI entry point for the greet command."""
 
+import sys
+
 import click
 
 from greet import __version__
+from greet.core import OutputConfig, generate_all_greetings
+from greet.output import create_console, render_all_greetings
 
 
 @click.command()
@@ -13,8 +17,26 @@ def main() -> None:
 
     Display "Hello, World!" in multiple languages with ASCII art flourishes.
     """
-    click.echo("Greet CLI v" + __version__)
-    click.echo("Basic CLI skeleton - functionality to be implemented in later phases.")
+    # Create output configuration with default options for User Story 1
+    config = OutputConfig(
+        languages=None,  # Show all languages
+        name="World",
+        show_figlet=True,
+        use_color=True,
+    )
+
+    # Generate greetings for all languages
+    greetings = generate_all_greetings(
+        languages=config.languages,
+        name=config.name,
+    )
+
+    # Create console and render all greetings
+    console = create_console(config)
+    render_all_greetings(greetings, config, console)
+
+    # Ensure exit code 0 on success
+    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from greet.languages import Language
+from greet.languages import LANGUAGES, Language
 
 
 @dataclass(frozen=True)
@@ -65,3 +65,32 @@ def generate_greeting(language: Language, name: str) -> Greeting:
     """
     text = language.greeting_template.format(name=name)
     return Greeting(language=language, text=text, banner="")
+
+
+def generate_all_greetings(
+    languages: list[str] | None = None, name: str = "World"
+) -> list[Greeting]:
+    """Generate greetings for all languages or a filtered subset.
+
+    Args:
+        languages: Optional list of language names to filter by (case-insensitive).
+                   If None, generates greetings for all supported languages.
+        name: Name to substitute in greeting templates (default: "World")
+
+    Returns:
+        List of Greeting objects for the specified languages
+    """
+    # If no filter, use all languages
+    if languages is None:
+        selected_languages = LANGUAGES
+    else:
+        # Filter languages by name (case-insensitive)
+        language_map = {lang.name.lower(): lang for lang in LANGUAGES}
+        selected_languages = []
+        for lang_name in languages:
+            lang_lower = lang_name.lower()
+            if lang_lower in language_map:
+                selected_languages.append(language_map[lang_lower])
+
+    # Generate greeting for each selected language
+    return [generate_greeting(lang, name) for lang in selected_languages]
