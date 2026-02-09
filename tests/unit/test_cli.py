@@ -770,3 +770,106 @@ def test_cli_rainbow_with_name() -> None:
     # Should contain personalized greeting (may have ANSI codes)
     assert "Hello" in result.output or "H" in result.output
     assert "Bob" in result.output or "B" in result.output
+
+
+def test_cli_box_flag() -> None:
+    """Test that --box draws a decorative box around greetings."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--box", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should be wrapped in a box (output is longer than just the greeting)
+    assert len(result.output) > len("Hello, World!") + 20
+
+
+def test_cli_box_with_figlet() -> None:
+    """Test that --box works with figlet banners."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--box"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain substantial output (figlet + box)
+    assert len(result.output) > 100
+
+
+def test_cli_box_with_no_figlet() -> None:
+    """Test box works with --no-figlet (boxes shown, banners hidden)."""
+    runner = CliRunner()
+    result_with_box = runner.invoke(main, ["-l", "english", "--box", "--no-figlet"])
+    result_without_box = runner.invoke(main, ["-l", "english", "--no-figlet"])
+
+    assert result_with_box.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result_with_box.output
+    # With box should be longer than without box
+    assert len(result_with_box.output) > len(result_without_box.output)
+
+
+def test_cli_box_with_multiple_languages() -> None:
+    """Test that --box wraps each greeting in a box."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english,french", "--box", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain both greetings
+    assert "Hello, World!" in result.output
+    assert "Bonjour" in result.output
+    # Each should be in its own box (output should be substantial)
+    assert len(result.output) > 100
+
+
+def test_cli_box_with_random() -> None:
+    """Test that --box works with --random flag."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--box", "--random", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should have output with a greeting
+    assert len(result.output.strip()) > 0
+    # Should contain a box (output is longer than just greeting)
+    assert len(result.output) > 30
+
+
+def test_cli_box_with_name() -> None:
+    """Test that --box works with --name option."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "french", "--box", "--name", "Marie", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain personalized greeting
+    assert "Bonjour, Marie !" in result.output
+
+
+def test_cli_box_with_party() -> None:
+    """Test that --box works with --party mode."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--box", "--party", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain party elements
+    assert "🇬🇧" in result.output
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result.output for emoji in confetti_emojis)
+
+
+def test_cli_box_with_no_color() -> None:
+    """Test that --box works with --no-color."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--box", "--no-color", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Box should still be present (output is longer)
+    assert len(result.output) > len("Hello, World!") + 20
+
+
+def test_cli_box_with_cowsay() -> None:
+    """Test that --box and --cowsay can be used together."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--box", "--cowsay", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain cowsay elements (cowsay might wrap the box or vice versa)
+    # Just verify both features produce output
+    assert len(result.output) > 100

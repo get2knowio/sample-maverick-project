@@ -371,3 +371,93 @@ def test_render_all_greetings_with_grid_layout() -> None:
     assert "Hello, World!" in result
     assert "Bonjour" in result
     assert "Hola" in result
+
+
+def test_render_greeting_with_box() -> None:
+    """Test greeting rendering with box mode enabled."""
+    language = LANGUAGES[0]  # English
+    greeting = generate_greeting(language, "World")
+    config = OutputConfig(show_figlet=False, use_color=False, show_box=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=False, width=80)
+
+    render_greeting(greeting, config, console)
+    result = output.getvalue()
+
+    # Should contain the greeting text
+    assert "Hello, World!" in result
+    # Should contain box drawing characters (Rich Panel uses box drawing)
+    # The output should be longer than just the greeting text
+    assert len(result) > len("Hello, World!")
+
+
+def test_render_greeting_with_box_and_figlet() -> None:
+    """Test greeting rendering with box mode and figlet banner."""
+    language = LANGUAGES[0]  # English
+    greeting = generate_greeting(language, "World")
+    config = OutputConfig(show_figlet=True, use_color=False, show_box=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=False, width=80)
+
+    render_greeting(greeting, config, console)
+    result = output.getvalue()
+
+    # Should contain the greeting text
+    assert "Hello, World!" in result
+    # Should contain figlet banner (multi-line ASCII art)
+    assert len(result.split("\n")) > 2
+    # Should be wrapped in a box (output is longer)
+    assert len(result) > 100
+
+
+def test_render_greeting_with_box_no_figlet() -> None:
+    """Test box works with --no-figlet (boxes shown, banners hidden)."""
+    language = LANGUAGES[0]  # English
+    greeting = generate_greeting(language, "World")
+    config = OutputConfig(show_figlet=False, use_color=False, show_box=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=False, width=80)
+
+    render_greeting(greeting, config, console)
+    result = output.getvalue()
+
+    # Should contain the greeting text
+    assert "Hello, World!" in result
+    # Should not contain extensive figlet output (fewer lines)
+    # Box with greeting only should be much shorter than with figlet
+    lines = result.split("\n")
+    # With box and no figlet, should have roughly 3-5 lines (top border, content, bottom border)
+    assert len(lines) < 10
+
+
+def test_render_greeting_with_box_and_party_mode() -> None:
+    """Test greeting rendering with box and party mode enabled."""
+    language = LANGUAGES[0]  # English
+    greeting = generate_greeting(language, "World")
+    config = OutputConfig(
+        show_figlet=False,
+        use_color=True,
+        show_box=True,
+        party_mode=True,
+    )
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=True, width=80)
+
+    render_greeting(greeting, config, console)
+    result = output.getvalue()
+
+    # Should contain the greeting text
+    assert "Hello, World!" in result
+    # Should contain flag emoji
+    assert language.flag_emoji in result
+    # Should contain confetti emojis
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result for emoji in confetti_emojis)

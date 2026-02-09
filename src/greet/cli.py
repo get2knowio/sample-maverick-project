@@ -88,6 +88,12 @@ from greet.output import create_console, render_all_greetings, render_fortune, r
     default=False,
     help="Enable rainbow color cycling on each character",
 )
+@click.option(
+    "--box",
+    is_flag=True,
+    default=False,
+    help="Draw a decorative Unicode box around each greeting",
+)
 def main(
     languages: str | None,
     no_figlet: bool,
@@ -100,6 +106,7 @@ def main(
     all_at_once: bool,
     typewriter: bool,
     rainbow: bool,
+    box: bool,
 ) -> None:
     """Multilingual greeting CLI tool.
 
@@ -142,6 +149,7 @@ def main(
         grid_layout=all_at_once,
         typewriter=typewriter,
         rainbow=rainbow,
+        show_box=box,
     )
 
     # Create console

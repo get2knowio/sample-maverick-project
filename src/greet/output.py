@@ -7,6 +7,7 @@ from rich.console import Console
 
 from greet.core import Greeting, OutputConfig
 from greet.fortunes import Proverb
+from greet.renderers.box import render_box
 from greet.renderers.cowsay import wrap_in_cowsay
 from greet.renderers.effects import (
     add_confetti,
@@ -41,6 +42,41 @@ def render_greeting(greeting: Greeting, config: OutputConfig, console: Console) 
         config: Output configuration
         console: Rich Console instance to render to
     """
+    # If box mode is enabled, capture the entire greeting output and wrap it in a box
+    if config.show_box:
+        # Create a temporary console to capture output
+        output_buffer = StringIO()
+        temp_console = Console(
+            file=output_buffer,
+            force_terminal=config.use_color,
+            no_color=not config.use_color,
+            highlight=False,
+        )
+
+        # Recursively call render_greeting with box mode disabled to capture the output
+        temp_config = OutputConfig(
+            languages=config.languages,
+            name=config.name,
+            show_figlet=config.show_figlet,
+            use_color=config.use_color,
+            random_mode=config.random_mode,
+            cowsay=config.cowsay,
+            party_mode=config.party_mode,
+            show_fortune=config.show_fortune,
+            grid_layout=config.grid_layout,
+            typewriter=config.typewriter,
+            rainbow=config.rainbow,
+            show_box=False,  # Disable box to avoid infinite recursion
+        )
+
+        # Render to temp console without box
+        render_greeting(greeting, temp_config, temp_console)
+
+        # Get the captured output and wrap it in a box
+        captured_output = output_buffer.getvalue().rstrip()
+        render_box(captured_output, console, config.use_color)
+        return
+
     # Handle animation modes (typewriter and/or rainbow)
     # Animation effects bypass normal rendering logic
     if config.typewriter or config.rainbow:
