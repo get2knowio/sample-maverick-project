@@ -97,9 +97,6 @@ def test_english_proverbs_have_no_translation() -> None:
 
 def test_proverbs_contain_multilingual_characters() -> None:
     """Test that proverbs contain appropriate multilingual characters."""
-    # Check for some expected character ranges
-    all_text = " ".join(p.text for p in PROVERBS)
-
     # Japanese proverbs should contain Japanese characters
     japanese_proverbs = [p for p in PROVERBS if p.language == "Japanese"]
     assert any(
@@ -133,7 +130,7 @@ def test_proverbs_contain_multilingual_characters() -> None:
 
 def test_each_language_has_two_proverbs() -> None:
     """Test that each language has exactly 2 proverbs."""
-    language_counts = {}
+    language_counts: dict[str, int] = {}
     for proverb in PROVERBS:
         language_counts[proverb.language] = language_counts.get(proverb.language, 0) + 1
 

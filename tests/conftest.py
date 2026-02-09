@@ -6,7 +6,7 @@ from greet.core import OutputConfig
 from greet.languages import Language
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore[misc]
 def sample_language() -> Language:
     """Provide a sample Language for testing."""
     return Language(
@@ -18,7 +18,7 @@ def sample_language() -> Language:
     )
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore[misc]
 def default_output_config() -> OutputConfig:
     """Provide default OutputConfig for testing."""
     return OutputConfig(
