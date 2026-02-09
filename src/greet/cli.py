@@ -26,73 +26,112 @@ from greet.output import create_console, render_all_greetings, render_fortune, r
     "-l",
     type=str,
     default=None,
-    help="Comma-separated list of languages to display (e.g., 'english,french,spanish')",
+    help=(
+        "Comma-separated list of languages to display (e.g., 'english,french,spanish'). "
+        "Valid languages: english, french, spanish, german, japanese, mandarin, arabic, "
+        "hindi, swahili, portuguese. Omit to display all languages."
+    ),
 )
 @click.option(
     "--no-figlet",
     is_flag=True,
     default=False,
-    help="Disable ASCII art banners",
+    help=(
+        "Disable ASCII art banners for language names. Use this for plain text output "
+        "or when terminal doesn't support large ASCII art."
+    ),
 )
 @click.option(
     "--no-color",
     is_flag=True,
     default=False,
-    help="Disable terminal colors",
+    help=(
+        "Disable terminal colors and produce plain text output. Useful for logging, "
+        "piping to files, or terminals without color support. Overrides --rainbow and "
+        "--party color features."
+    ),
 )
 @click.option(
     "--random",
     is_flag=True,
     default=False,
-    help="Display exactly one randomly selected language",
+    help=(
+        "Display exactly one randomly selected language instead of all languages. "
+        "Can be combined with --languages to select randomly from a filtered subset."
+    ),
 )
 @click.option(
     "--name",
     type=str,
     default="World",
-    help="Name to substitute in greetings (default: 'World')",
+    help=(
+        "Custom name to substitute in greetings instead of 'World' "
+        "(e.g., --name 'Alice' produces 'Hello, Alice!'). "
+        "Name is properly localized for each language."
+    ),
 )
 @click.option(
     "--cowsay",
     is_flag=True,
     default=False,
-    help="Wrap output in a cowsay-style speech bubble",
+    help=(
+        "Wrap the entire output in a cowsay-style speech bubble with an ASCII animal. "
+        "Adds whimsical flair to any greeting combination."
+    ),
 )
 @click.option(
     "--party",
     is_flag=True,
     default=False,
-    help="Enable party mode with confetti, flag emojis, and random colors",
+    help=(
+        "Enable party mode: adds emoji confetti, country flag emojis for each language, "
+        "and randomized colors for extra celebration. Colors disabled if --no-color is used."
+    ),
 )
 @click.option(
     "--fortune",
     is_flag=True,
     default=False,
-    help="Append a random multilingual proverb after greetings",
+    help=(
+        "Append a random multilingual proverb or saying after the greetings. "
+        "Adds cultural wisdom from around the world."
+    ),
 )
 @click.option(
     "--all-at-once",
     is_flag=True,
     default=False,
-    help="Display greetings in a grid layout rather than sequentially",
+    help=(
+        "Display all greetings in a compact grid layout instead of sequential display. "
+        "Grid adapts to terminal width automatically."
+    ),
 )
 @click.option(
     "--typewriter",
     is_flag=True,
     default=False,
-    help="Enable typewriter animation with character-by-character display",
+    help=(
+        "Enable typewriter animation with character-by-character display. "
+        "Creates a typing effect for dynamic visual appeal."
+    ),
 )
 @click.option(
     "--rainbow",
     is_flag=True,
     default=False,
-    help="Enable rainbow color cycling on each character",
+    help=(
+        "Enable rainbow color cycling where each character cycles through rainbow colors. "
+        "Disabled if --no-color is used."
+    ),
 )
 @click.option(
     "--box",
     is_flag=True,
     default=False,
-    help="Draw a decorative Unicode box around each greeting",
+    help=(
+        "Draw a decorative Unicode box border around each greeting. "
+        "Works with or without --no-figlet for framed output."
+    ),
 )
 def main(
     languages: str | None,
@@ -108,9 +147,28 @@ def main(
     rainbow: bool,
     box: bool,
 ) -> None:
-    """Multilingual greeting CLI tool.
+    """Multilingual greeting CLI tool - Display "Hello, World!" in 10 languages with ASCII art.
 
-    Display "Hello, World!" in multiple languages with ASCII art flourishes.
+    By default, displays greetings in all 10 supported languages (English, French,
+    Spanish, German, Japanese, Mandarin, Arabic, Hindi, Swahili, Portuguese) with
+    colorful ASCII art banners.
+
+    \b
+    Examples:
+      greet                              # All languages with ASCII art
+      greet -l french,spanish            # Only French and Spanish
+      greet --name "Alice"               # Personalized greetings
+      greet --random --cowsay            # Random greeting in speech bubble
+      greet --party --fortune            # Celebration mode with proverb
+      greet --no-color --no-figlet       # Plain text (for piping/logging)
+      greet --all-at-once --box          # Grid layout with borders
+      greet --typewriter --rainbow       # Animated rainbow effect
+
+    \b
+    Exit Codes:
+      0 - Success
+      1 - Invalid option or argument
+      2 - Invalid language name specified
     """
     # Parse and validate language filter if provided
     language_list: list[str] | None = None
