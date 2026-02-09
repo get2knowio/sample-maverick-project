@@ -87,12 +87,29 @@ def rainbow_print(text: str, use_color: bool = True) -> str:
         "bright_magenta",
     ]
 
+    # Split text into grapheme clusters to avoid breaking multi-codepoint emojis
+    # This handles flag emojis (regional indicator pairs) and other complex emojis
+    import re
+
+    # Pattern matches:
+    # - Flag emojis: two consecutive regional indicator symbols (U+1F1E6 to U+1F1FF)
+    # - Emojis with variation selectors (e.g., ️)
+    # - Zero-width joiner sequences (families, etc.)
+    # - Single characters as fallback
+    flag_pattern = re.compile(
+        r"(?:[\U0001F1E6-\U0001F1FF]{2}|"  # Regional indicator pairs (flags)
+        r"[\U0001F300-\U0001F9FF][\uFE00-\uFE0F\u200D\U0001F3FB-\U0001F3FF]*|"  # Emojis with modifiers
+        r".)",  # Single character fallback
+        re.UNICODE | re.DOTALL,
+    )
+    graphemes = flag_pattern.findall(text)
+
     result_parts: list[str] = []
-    for i, char in enumerate(text):
+    for i, grapheme in enumerate(graphemes):
         color = rainbow_colors[i % len(rainbow_colors)]
-        if char.strip():  # Only colorize non-whitespace characters
-            result_parts.append(f"[{color}]{char}[/{color}]")
+        if grapheme.strip():  # Only colorize non-whitespace characters
+            result_parts.append(f"[{color}]{grapheme}[/{color}]")
         else:
-            result_parts.append(char)
+            result_parts.append(grapheme)
 
     return "".join(result_parts)
