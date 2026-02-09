@@ -9,6 +9,7 @@ from greet.core import (
     generate_all_greetings,
     generate_greeting,
     parse_language_filter,
+    select_random_language,
 )
 from greet.languages import LANGUAGES, Language
 
@@ -318,3 +319,53 @@ def test_filter_languages_preserves_order() -> None:
     assert languages[0].name == "Spanish"
     assert languages[1].name == "English"
     assert languages[2].name == "French"
+
+
+def test_select_random_language_from_all() -> None:
+    """Test selecting a random language from all available languages."""
+    language = select_random_language()
+    # Should return one of the available languages
+    assert language in LANGUAGES
+
+
+def test_select_random_language_from_filtered_list() -> None:
+    """Test selecting a random language from a filtered list."""
+    language_names = ["english", "french"]
+    language = select_random_language(language_names)
+    # Should return one of the filtered languages
+    assert language.name in ["English", "French"]
+
+
+def test_select_random_language_single_option() -> None:
+    """Test selecting from a single language option."""
+    language_names = ["spanish"]
+    language = select_random_language(language_names)
+    # Should return the only available language
+    assert language.name == "Spanish"
+
+
+def test_select_random_language_is_random() -> None:
+    """Test that select_random_language produces different results."""
+    # Run multiple times and check we get different languages
+    results = []
+    for _ in range(20):
+        lang = select_random_language()
+        results.append(lang.code)
+
+    # With 20 runs and 10 languages, very likely to see at least 2 different ones
+    unique_results = set(results)
+    assert len(unique_results) >= 2
+
+
+def test_select_random_language_empty_filter_uses_all() -> None:
+    """Test that empty filter list uses all languages."""
+    language = select_random_language([])
+    # Even with empty filter, should return a language from LANGUAGES
+    assert language in LANGUAGES
+
+
+def test_select_random_language_none_filter_uses_all() -> None:
+    """Test that None filter uses all languages."""
+    language = select_random_language(None)
+    # Should return one of all available languages
+    assert language in LANGUAGES

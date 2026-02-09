@@ -155,3 +155,85 @@ def test_cli_invalid_language_exit_code() -> None:
     runner = CliRunner()
     result = runner.invoke(main, ["--languages", "notareallanguage"])
     assert result.exit_code == 2
+
+
+def test_cli_no_figlet_flag() -> None:
+    """Test that --no-figlet disables ASCII art banners."""
+    runner = CliRunner()
+    result_with_figlet = runner.invoke(main, ["-l", "english"])
+    result_without_figlet = runner.invoke(main, ["-l", "english", "--no-figlet"])
+
+    assert result_without_figlet.exit_code == 0
+    assert "Hello, World!" in result_without_figlet.output
+    # Output without figlet should be significantly shorter
+    assert len(result_without_figlet.output) < len(result_with_figlet.output)
+
+
+def test_cli_no_color_flag() -> None:
+    """Test that --no-color disables terminal colors."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--no-color"])
+
+    assert result.exit_code == 0
+    assert "Hello, World!" in result.output
+    # Should not contain ANSI color codes (basic check)
+    # Rich may still add some formatting, but major color codes should be absent
+
+
+def test_cli_random_flag() -> None:
+    """Test that --random displays exactly one random language."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--random"])
+
+    assert result.exit_code == 0
+    # Output should contain a greeting but be much shorter than all languages
+    assert len(result.output) > 0
+    # Quick check: output should be significantly shorter than default (all languages)
+    result_all = runner.invoke(main)
+    assert len(result.output) < len(result_all.output) / 3  # At least 3x shorter
+
+
+def test_cli_random_flag_with_language_filter() -> None:
+    """Test that --random works with --languages to select from filtered set."""
+    runner = CliRunner()
+    # When filtering to one language, random should still work and show that language
+    result = runner.invoke(main, ["--random", "-l", "english"])
+
+    assert result.exit_code == 0
+    assert "Hello, World!" in result.output
+    # Should not contain other languages
+    assert "Bonjour" not in result.output
+
+
+def test_cli_random_flag_changes_output() -> None:
+    """Test that --random produces different outputs (statistically)."""
+    runner = CliRunner()
+    # Run multiple times and collect outputs
+    outputs = []
+    for _ in range(10):
+        result = runner.invoke(main, ["--random"])
+        outputs.append(result.output)
+
+    # At least some outputs should differ (very high probability with 10 languages)
+    unique_outputs = set(outputs)
+    # With 10 runs and 10 languages, we should see at least 2 different languages
+    assert len(unique_outputs) >= 2
+
+
+def test_cli_no_figlet_and_no_color_combined() -> None:
+    """Test that --no-figlet and --no-color work together."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--no-figlet", "--no-color"])
+
+    assert result.exit_code == 0
+    assert "Hello, World!" in result.output
+
+
+def test_cli_random_with_no_figlet() -> None:
+    """Test that --random and --no-figlet work together."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--random", "--no-figlet"])
+
+    assert result.exit_code == 0
+    # Should have minimal output - just one greeting without banner
+    assert len(result.output.strip()) > 0

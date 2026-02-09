@@ -1,5 +1,6 @@
 """Core greeting generation logic and data structures."""
 
+import random
 from dataclasses import dataclass
 
 from greet.languages import LANGUAGES, Language, get_language_by_name
@@ -121,3 +122,27 @@ def generate_all_greetings(
 
     # Generate greeting for each selected language
     return [generate_greeting(lang, name) for lang in selected_languages]
+
+
+def select_random_language(languages: list[str] | None = None) -> Language:
+    """Select a random language from all languages or a filtered subset.
+
+    Args:
+        languages: Optional list of language names to filter by (case-insensitive).
+                   If None or empty, selects from all supported languages.
+
+    Returns:
+        A randomly selected Language object
+    """
+    # If no filter or empty filter, use all languages
+    if not languages:
+        selected_languages = LANGUAGES
+    else:
+        # Filter languages by name (case-insensitive)
+        selected_languages = filter_languages(languages)
+        # If filtering resulted in empty list, fall back to all languages
+        if not selected_languages:
+            selected_languages = LANGUAGES
+
+    # Select and return a random language
+    return random.choice(selected_languages)

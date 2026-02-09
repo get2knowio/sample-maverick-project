@@ -5,9 +5,16 @@ import sys
 import click
 
 from greet import __version__
-from greet.core import OutputConfig, filter_languages, generate_all_greetings, parse_language_filter
+from greet.core import (
+    OutputConfig,
+    filter_languages,
+    generate_all_greetings,
+    generate_greeting,
+    parse_language_filter,
+    select_random_language,
+)
 from greet.languages import LANGUAGES
-from greet.output import create_console, render_all_greetings
+from greet.output import create_console, render_all_greetings, render_greeting
 
 
 @click.command()
@@ -20,7 +27,25 @@ from greet.output import create_console, render_all_greetings
     default=None,
     help="Comma-separated list of languages to display (e.g., 'english,french,spanish')",
 )
-def main(languages: str | None) -> None:
+@click.option(
+    "--no-figlet",
+    is_flag=True,
+    default=False,
+    help="Disable ASCII art banners",
+)
+@click.option(
+    "--no-color",
+    is_flag=True,
+    default=False,
+    help="Disable terminal colors",
+)
+@click.option(
+    "--random",
+    is_flag=True,
+    default=False,
+    help="Display exactly one randomly selected language",
+)
+def main(languages: str | None, no_figlet: bool, no_color: bool, random: bool) -> None:
     """Multilingual greeting CLI tool.
 
     Display "Hello, World!" in multiple languages with ASCII art flourishes.
@@ -49,23 +74,34 @@ def main(languages: str | None) -> None:
                 )
                 sys.exit(2)
 
-    # Create output configuration with default options for User Story 1
+    # Create output configuration with CLI options
     config = OutputConfig(
         languages=language_list,
         name="World",
-        show_figlet=True,
-        use_color=True,
+        show_figlet=not no_figlet,
+        use_color=not no_color,
+        random_mode=random,
     )
 
-    # Generate greetings for all languages
-    greetings = generate_all_greetings(
-        languages=config.languages,
-        name=config.name,
-    )
-
-    # Create console and render all greetings
+    # Create console
     console = create_console(config)
-    render_all_greetings(greetings, config, console)
+
+    # Handle random mode - select and display a single random language
+    if random:
+        # Select a random language from the filtered set (or all if no filter)
+        random_language = select_random_language(config.languages)
+        # Generate greeting for the selected language
+        greeting = generate_greeting(random_language, config.name)
+        # Render single greeting
+        render_greeting(greeting, config, console)
+    else:
+        # Generate greetings for all languages
+        greetings = generate_all_greetings(
+            languages=config.languages,
+            name=config.name,
+        )
+        # Render all greetings
+        render_all_greetings(greetings, config, console)
 
     # Ensure exit code 0 on success
     sys.exit(0)
