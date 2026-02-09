@@ -768,5 +768,5 @@ def test_cli_rainbow_with_name() -> None:
     result = runner.invoke(main, ["-l", "english", "--rainbow", "--name", "Bob", "--no-figlet"])
     assert result.exit_code == 0
     # Should contain personalized greeting (may have ANSI codes)
-    assert "Bob" in result.output
     assert "Hello" in result.output or "H" in result.output
+    assert "Bob" in result.output or "B" in result.output

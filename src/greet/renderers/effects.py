@@ -98,7 +98,7 @@ def rainbow_print(text: str, use_color: bool = True) -> str:
     # - Single characters as fallback
     flag_pattern = re.compile(
         r"(?:[\U0001F1E6-\U0001F1FF]{2}|"  # Regional indicator pairs (flags)
-        r"[\U0001F300-\U0001F9FF][\uFE00-\uFE0F\u200D\U0001F3FB-\U0001F3FF]*|"  # Emojis with modifiers
+        r"[\U0001F300-\U0001F9FF][\uFE00-\uFE0F\u200D\U0001F3FB-\U0001F3FF]*|"
         r".)",  # Single character fallback
         re.UNICODE | re.DOTALL,
     )
