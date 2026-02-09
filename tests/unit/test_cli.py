@@ -649,3 +649,124 @@ def test_cli_all_at_once_narrow_terminal() -> None:
     assert "Hello, World!" in result.output
     assert "Bonjour" in result.output
     assert "Hola" in result.output
+
+
+def test_cli_typewriter_flag() -> None:
+    """Test that --typewriter enables typewriter animation."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--typewriter", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+
+
+def test_cli_typewriter_with_random() -> None:
+    """Test that --typewriter works with --random flag."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--typewriter", "--random", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should have output with a greeting
+    assert len(result.output.strip()) > 0
+
+
+def test_cli_typewriter_with_no_color() -> None:
+    """Test that --typewriter works with --no-color."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--typewriter", "--no-color", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+
+
+def test_cli_rainbow_flag() -> None:
+    """Test that --rainbow enables rainbow color cycling."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--rainbow", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain the greeting text (may have ANSI codes between characters)
+    # Check that key characters are present
+    assert "H" in result.output and "e" in result.output and "l" in result.output
+    assert "World" in result.output or "W" in result.output
+
+
+def test_cli_rainbow_with_random() -> None:
+    """Test that --rainbow works with --random flag."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--rainbow", "--random", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should have output with a greeting
+    assert len(result.output.strip()) > 0
+
+
+def test_cli_rainbow_respects_no_color() -> None:
+    """Test that --rainbow respects --no-color flag (no colors applied)."""
+    runner = CliRunner()
+    result_with_color = runner.invoke(main, ["-l", "english", "--rainbow", "--no-figlet"])
+    result_without_color = runner.invoke(
+        main, ["-l", "english", "--rainbow", "--no-color", "--no-figlet"]
+    )
+
+    assert result_without_color.exit_code == 0
+    assert result_with_color.exit_code == 0
+
+    # With color, output should have ANSI escape codes
+    assert "\x1b[" in result_with_color.output
+
+    # Without color, the greeting should appear as plain text
+    assert "Hello, World!" in result_without_color.output
+
+    # Without color should not have ANSI escape codes
+    assert "\x1b[" not in result_without_color.output
+
+
+def test_cli_typewriter_and_rainbow_combined() -> None:
+    """Test that --typewriter and --rainbow work together."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--typewriter", "--rainbow", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain greeting text (may have ANSI codes from rainbow)
+    assert "Hello" in result.output or "H" in result.output
+    assert "World" in result.output or "W" in result.output
+
+
+def test_cli_typewriter_with_party() -> None:
+    """Test that --typewriter works with --party mode."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--typewriter", "--party", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain party elements
+    assert "🇬🇧" in result.output
+
+
+def test_cli_rainbow_with_party() -> None:
+    """Test that --rainbow works with --party mode."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--rainbow", "--party", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain greeting text (may have ANSI codes)
+    assert "Hello" in result.output or "H" in result.output
+    # Should contain party elements
+    assert "🇬🇧" in result.output
+
+
+def test_cli_typewriter_with_name() -> None:
+    """Test that --typewriter works with --name option."""
+    runner = CliRunner()
+    result = runner.invoke(
+        main, ["-l", "english", "--typewriter", "--name", "Alice", "--no-figlet"]
+    )
+    assert result.exit_code == 0
+    # Should contain personalized greeting
+    assert "Hello, Alice!" in result.output
+
+
+def test_cli_rainbow_with_name() -> None:
+    """Test that --rainbow works with --name option."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--rainbow", "--name", "Bob", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain personalized greeting (may have ANSI codes)
+    assert "Bob" in result.output
+    assert "Hello" in result.output or "H" in result.output

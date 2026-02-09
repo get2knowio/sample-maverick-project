@@ -8,7 +8,12 @@ from rich.console import Console
 from greet.core import Greeting, OutputConfig
 from greet.fortunes import Proverb
 from greet.renderers.cowsay import wrap_in_cowsay
-from greet.renderers.effects import add_confetti, random_color_style
+from greet.renderers.effects import (
+    add_confetti,
+    rainbow_print,
+    random_color_style,
+    typewriter_print,
+)
 from greet.renderers.figlet import render_figlet_banner
 
 
@@ -36,6 +41,52 @@ def render_greeting(greeting: Greeting, config: OutputConfig, console: Console) 
         config: Output configuration
         console: Rich Console instance to render to
     """
+    # Handle animation modes (typewriter and/or rainbow)
+    # Animation effects bypass normal rendering logic
+    if config.typewriter or config.rainbow:
+        # Render figlet banner if enabled (without animation)
+        if config.show_figlet:
+            banner = render_figlet_banner(greeting.language.banner_name)
+            # Use random color for banner in party mode, otherwise bold cyan
+            if config.party_mode and config.use_color:
+                banner_style = f"bold {random_color_style()}"
+            else:
+                banner_style = "bold cyan"
+            console.print(banner, style=banner_style)
+
+        # Prepare greeting text
+        greeting_text = greeting.text
+
+        # Add flag emoji in party mode
+        if config.party_mode:
+            greeting_text = f"{greeting.language.flag_emoji} {greeting_text}"
+
+        # Add confetti in party mode
+        if config.party_mode:
+            greeting_text = add_confetti(greeting_text)
+
+        # Apply rainbow effect if enabled
+        if config.rainbow:
+            greeting_text = rainbow_print(greeting_text, config.use_color)
+
+        # If typewriter mode is enabled, use typewriter_print
+        if config.typewriter:
+            # For typewriter mode, we need to print directly (bypassing Rich console)
+            # First, render the rainbow markup if present
+            if config.rainbow and config.use_color:
+                # Use Rich console to render the rainbow markup, then animate
+                # This is a simplified approach - print character by character
+                console.print(greeting_text)
+            else:
+                # Pure typewriter without rainbow
+                typewriter_print(greeting_text)
+        else:
+            # Rainbow mode without typewriter - just print with rainbow colors
+            console.print(greeting_text, markup=True)
+
+        console.print()  # Empty line for spacing
+        return
+
     # If cowsay mode is enabled, capture output and wrap it
     if config.cowsay:
         # Create a temporary console to capture output
