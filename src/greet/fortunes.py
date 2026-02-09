@@ -1,5 +1,6 @@
 """Multilingual proverbs and sayings for the fortune feature."""
 
+import random
 from dataclasses import dataclass
 
 
@@ -120,3 +121,12 @@ PROVERBS: list[Proverb] = [
         translation="Soft water on hard stone hits until it pierces.",
     ),
 ]
+
+
+def select_random_proverb() -> Proverb:
+    """Select a random proverb from the PROVERBS list.
+
+    Returns:
+        A randomly selected Proverb object
+    """
+    return random.choice(PROVERBS)

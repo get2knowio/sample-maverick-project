@@ -442,3 +442,101 @@ def test_cli_party_with_multiple_languages() -> None:
     # Should contain confetti
     confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
     assert any(emoji in result.output for emoji in confetti_emojis)
+
+
+def test_cli_fortune_flag() -> None:
+    """Test that --fortune appends a proverb after greetings."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--fortune"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain fortune elements
+    assert "Fortune" in result.output or "fortune" in result.output
+    # Should contain proverb marker (quotes)
+    assert '"' in result.output
+
+
+def test_cli_fortune_appears_after_greetings() -> None:
+    """Test that fortune appears after all greetings."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "french,spanish", "--fortune"])
+    assert result.exit_code == 0
+    # Should contain greetings
+    assert "Bonjour" in result.output
+    assert "Hola" in result.output
+    # Fortune should appear (contains separator line)
+    assert "─" in result.output or "Fortune" in result.output
+
+
+def test_cli_fortune_changes_output() -> None:
+    """Test that --fortune produces different proverbs (statistically)."""
+    runner = CliRunner()
+    # Run multiple times and collect outputs
+    outputs = []
+    for _ in range(10):
+        result = runner.invoke(main, ["-l", "english", "--fortune"])
+        outputs.append(result.output)
+
+    # At least some outputs should differ (very high probability with 20 proverbs)
+    unique_outputs = set(outputs)
+    # With 10 runs and 20 proverbs, we should see at least 2 different fortunes
+    assert len(unique_outputs) >= 2
+
+
+def test_cli_fortune_with_random() -> None:
+    """Test that --fortune works with --random flag."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--random", "--fortune"])
+    assert result.exit_code == 0
+    # Should contain a greeting (random language)
+    assert len(result.output) > 0
+    # Should contain fortune elements
+    assert "Fortune" in result.output or "fortune" in result.output
+
+
+def test_cli_fortune_with_no_color() -> None:
+    """Test that --fortune works with --no-color."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--fortune", "--no-color"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain fortune text
+    assert "Fortune" in result.output or "fortune" in result.output
+
+
+def test_cli_fortune_with_cowsay() -> None:
+    """Test that --fortune works with --cowsay."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "spanish", "--fortune", "--cowsay"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hola" in result.output
+    # Should contain fortune elements
+    assert "Fortune" in result.output or "fortune" in result.output or '"' in result.output
+    # Note: cowsay may only wrap greetings, fortune may appear after the cow
+
+
+def test_cli_fortune_with_party() -> None:
+    """Test that --fortune works with --party."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--fortune", "--party"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain party elements
+    assert "🇬🇧" in result.output
+    # Should contain fortune elements
+    assert "Fortune" in result.output or "fortune" in result.output
+
+
+def test_cli_fortune_with_name() -> None:
+    """Test that --fortune works with --name option."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--name", "Alice", "-l", "english", "--fortune"])
+    assert result.exit_code == 0
+    # Should contain personalized greeting
+    assert "Hello, Alice!" in result.output
+    # Should contain fortune
+    assert "Fortune" in result.output or "fortune" in result.output

@@ -136,3 +136,27 @@ def test_each_language_has_two_proverbs() -> None:
 
     for language, count in language_counts.items():
         assert count == 2, f"{language} should have exactly 2 proverbs, but has {count}"
+
+
+def test_select_random_proverb_returns_proverb() -> None:
+    """Test that select_random_proverb returns a Proverb object."""
+    from greet.fortunes import select_random_proverb
+
+    proverb = select_random_proverb()
+    assert isinstance(proverb, Proverb)
+    assert proverb in PROVERBS
+
+
+def test_select_random_proverb_returns_different_proverbs() -> None:
+    """Test that select_random_proverb returns different proverbs (statistically)."""
+    from greet.fortunes import select_random_proverb
+
+    # Run multiple times and collect proverbs
+    proverbs = []
+    for _ in range(20):
+        proverb = select_random_proverb()
+        proverbs.append(proverb.text)
+
+    # With 20 proverbs in the list and 20 draws, we should see at least 2 different ones
+    unique_proverbs = set(proverbs)
+    assert len(unique_proverbs) >= 2, "Random selection should produce variety"

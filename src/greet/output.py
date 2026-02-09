@@ -5,6 +5,7 @@ from io import StringIO
 from rich.console import Console
 
 from greet.core import Greeting, OutputConfig
+from greet.fortunes import Proverb
 from greet.renderers.cowsay import wrap_in_cowsay
 from greet.renderers.effects import add_confetti, random_color_style
 from greet.renderers.figlet import render_figlet_banner
@@ -146,3 +147,48 @@ def render_all_greetings(greetings: list[Greeting], config: OutputConfig, consol
         # Normal rendering without cowsay
         for greeting in greetings:
             render_greeting(greeting, config, console)
+
+
+def render_fortune(proverb: Proverb, config: OutputConfig, console: Console) -> None:
+    """Render a fortune (proverb) to the console.
+
+    Args:
+        proverb: The proverb to render
+        config: Output configuration
+        console: Rich Console instance to render to
+    """
+    # Add separator line before fortune
+    console.print()
+    console.print("─" * 60, style="dim")
+    console.print()
+
+    # Render fortune header
+    if config.use_color:
+        console.print("✨ Fortune of the Day ✨", style="bold magenta", justify="center")
+    else:
+        console.print("Fortune of the Day", justify="center")
+
+    console.print()
+
+    # Render proverb text
+    if config.use_color:
+        console.print(f'"{proverb.text}"', style="italic yellow")
+    else:
+        console.print(f'"{proverb.text}"', style="italic")
+
+    # Render translation if available
+    if proverb.translation:
+        console.print()
+        if config.use_color:
+            console.print(f"— {proverb.translation}", style="dim cyan")
+        else:
+            console.print(f"— {proverb.translation}", style="dim")
+
+    # Show language origin
+    console.print()
+    if config.use_color:
+        console.print(f"[{proverb.language} proverb]", style="dim", justify="right")
+    else:
+        console.print(f"[{proverb.language} proverb]", justify="right")
+
+    console.print()

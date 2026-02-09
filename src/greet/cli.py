@@ -13,8 +13,9 @@ from greet.core import (
     parse_language_filter,
     select_random_language,
 )
+from greet.fortunes import select_random_proverb
 from greet.languages import LANGUAGES
-from greet.output import create_console, render_all_greetings, render_greeting
+from greet.output import create_console, render_all_greetings, render_fortune, render_greeting
 
 
 @click.command()
@@ -63,6 +64,12 @@ from greet.output import create_console, render_all_greetings, render_greeting
     default=False,
     help="Enable party mode with confetti, flag emojis, and random colors",
 )
+@click.option(
+    "--fortune",
+    is_flag=True,
+    default=False,
+    help="Append a random multilingual proverb after greetings",
+)
 def main(
     languages: str | None,
     no_figlet: bool,
@@ -71,6 +78,7 @@ def main(
     name: str,
     cowsay: bool,
     party: bool,
+    fortune: bool,
 ) -> None:
     """Multilingual greeting CLI tool.
 
@@ -109,6 +117,7 @@ def main(
         random_mode=random,
         cowsay=cowsay,
         party_mode=party,
+        show_fortune=fortune,
     )
 
     # Create console
@@ -130,6 +139,11 @@ def main(
         )
         # Render all greetings
         render_all_greetings(greetings, config, console)
+
+    # Render fortune if enabled
+    if fortune:
+        proverb = select_random_proverb()
+        render_fortune(proverb, config, console)
 
     # Ensure exit code 0 on success
     sys.exit(0)

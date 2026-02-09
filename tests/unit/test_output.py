@@ -195,3 +195,74 @@ def test_render_greeting_party_mode_with_figlet() -> None:
     assert any(emoji in result for emoji in confetti_emojis)
     # Should contain figlet banner
     assert len(result.split("\n")) > 2
+
+
+def test_render_fortune_basic() -> None:
+    """Test basic fortune rendering."""
+    from greet.fortunes import Proverb
+    from greet.output import render_fortune
+
+    proverb = Proverb(
+        text="A journey of a thousand miles begins with a single step.",
+        language="English",
+        translation=None,
+    )
+    config = OutputConfig(use_color=False)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=False)
+
+    render_fortune(proverb, config, console)
+    result = output.getvalue()
+
+    # Should contain the proverb text
+    assert "A journey of a thousand miles begins with a single step." in result
+
+
+def test_render_fortune_with_translation() -> None:
+    """Test fortune rendering with translation."""
+    from greet.fortunes import Proverb
+    from greet.output import render_fortune
+
+    proverb = Proverb(
+        text="Petit à petit, l'oiseau fait son nid.",
+        language="French",
+        translation="Little by little, the bird builds its nest.",
+    )
+    config = OutputConfig(use_color=False)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=False)
+
+    render_fortune(proverb, config, console)
+    result = output.getvalue()
+
+    # Should contain the proverb text
+    assert "Petit à petit, l'oiseau fait son nid." in result
+    # Should contain the translation
+    assert "Little by little, the bird builds its nest." in result
+
+
+def test_render_fortune_with_color() -> None:
+    """Test fortune rendering with color enabled."""
+    from greet.fortunes import Proverb
+    from greet.output import render_fortune
+
+    proverb = Proverb(
+        text="Where there's a will, there's a way.",
+        language="English",
+        translation=None,
+    )
+    config = OutputConfig(use_color=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=True)
+
+    render_fortune(proverb, config, console)
+    result = output.getvalue()
+
+    # Should contain the proverb text
+    assert "Where there's a will, there's a way." in result
