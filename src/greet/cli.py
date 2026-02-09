@@ -57,8 +57,20 @@ from greet.output import create_console, render_all_greetings, render_greeting
     default=False,
     help="Wrap output in a cowsay-style speech bubble",
 )
+@click.option(
+    "--party",
+    is_flag=True,
+    default=False,
+    help="Enable party mode with confetti, flag emojis, and random colors",
+)
 def main(
-    languages: str | None, no_figlet: bool, no_color: bool, random: bool, name: str, cowsay: bool
+    languages: str | None,
+    no_figlet: bool,
+    no_color: bool,
+    random: bool,
+    name: str,
+    cowsay: bool,
+    party: bool,
 ) -> None:
     """Multilingual greeting CLI tool.
 
@@ -96,6 +108,7 @@ def main(
         use_color=not no_color,
         random_mode=random,
         cowsay=cowsay,
+        party_mode=party,
     )
 
     # Create console

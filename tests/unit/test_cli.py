@@ -369,3 +369,76 @@ def test_cli_cowsay_with_multiple_languages() -> None:
     assert "Bonjour" in result.output
     # Should contain bubble and cow
     assert "(oo)" in result.output
+
+
+def test_cli_party_flag() -> None:
+    """Test that --party adds confetti and flag emojis."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--party"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hello, World!" in result.output
+    # Should contain flag emoji
+    assert "🇬🇧" in result.output
+    # Should contain confetti emojis (at least one)
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result.output for emoji in confetti_emojis)
+
+
+def test_cli_party_with_no_color() -> None:
+    """Test that --party respects --no-color (flags shown, colors disabled)."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "french", "--party", "--no-color"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Bonjour" in result.output
+    # Should contain flag emoji (emojis still appear)
+    assert "🇫🇷" in result.output
+    # Should contain confetti emojis (emojis still appear)
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result.output for emoji in confetti_emojis)
+
+
+def test_cli_party_with_random() -> None:
+    """Test that --party works with --random flag."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--party", "--random"])
+    assert result.exit_code == 0
+    # Should contain confetti emojis
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result.output for emoji in confetti_emojis)
+    # Should contain at least one flag emoji
+    flag_emojis = ["🇬🇧", "🇫🇷", "🇪🇸", "🇩🇪", "🇯🇵", "🇨🇳", "🇸🇦", "🇮🇳", "🇰🇪", "🇧🇷"]
+    assert any(emoji in result.output for emoji in flag_emojis)
+
+
+def test_cli_party_with_cowsay() -> None:
+    """Test that --party works with --cowsay."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "spanish", "--party", "--cowsay"])
+    assert result.exit_code == 0
+    # Should contain the greeting
+    assert "Hola" in result.output
+    # Should contain flag emoji
+    assert "🇪🇸" in result.output
+    # Should contain confetti
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result.output for emoji in confetti_emojis)
+    # Should contain cowsay
+    assert "(oo)" in result.output
+
+
+def test_cli_party_with_multiple_languages() -> None:
+    """Test that --party works with multiple languages."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english,japanese", "--party"])
+    assert result.exit_code == 0
+    # Should contain both greetings
+    assert "Hello, World!" in result.output
+    assert "こんにちは、World！" in result.output  # Japanese greeting with World
+    # Should contain both flag emojis
+    assert "🇬🇧" in result.output
+    assert "🇯🇵" in result.output
+    # Should contain confetti
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result.output for emoji in confetti_emojis)

@@ -127,3 +127,71 @@ def test_render_all_greetings_empty_list() -> None:
 
     # Output should be minimal or empty
     assert len(result.strip()) == 0
+
+
+def test_render_greeting_with_party_mode() -> None:
+    """Test greeting rendering with party mode enabled."""
+    language = LANGUAGES[0]  # English
+    greeting = generate_greeting(language, "World")
+    config = OutputConfig(show_figlet=False, use_color=True, party_mode=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=True)
+
+    render_greeting(greeting, config, console)
+    result = output.getvalue()
+
+    # Should contain the greeting text
+    assert "Hello, World!" in result
+    # Should contain flag emoji
+    assert language.flag_emoji in result
+    # Should contain confetti emojis (one of them)
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result for emoji in confetti_emojis)
+
+
+def test_render_greeting_party_mode_respects_no_color() -> None:
+    """Test that party mode respects --no-color flag (flags shown, colors disabled)."""
+    language = LANGUAGES[0]  # English
+    greeting = generate_greeting(language, "World")
+    config = OutputConfig(show_figlet=False, use_color=False, party_mode=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=False, no_color=True)
+
+    render_greeting(greeting, config, console)
+    result = output.getvalue()
+
+    # Should contain the greeting text
+    assert "Hello, World!" in result
+    # Should contain flag emoji (emojis should still appear)
+    assert language.flag_emoji in result
+    # Should contain confetti emojis (emojis should still appear)
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result for emoji in confetti_emojis)
+
+
+def test_render_greeting_party_mode_with_figlet() -> None:
+    """Test greeting rendering with party mode and figlet enabled."""
+    language = LANGUAGES[1]  # French
+    greeting = generate_greeting(language, "World")
+    config = OutputConfig(show_figlet=True, use_color=True, party_mode=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=True)
+
+    render_greeting(greeting, config, console)
+    result = output.getvalue()
+
+    # Should contain the greeting text
+    assert "Bonjour" in result
+    # Should contain flag emoji
+    assert language.flag_emoji in result
+    # Should contain confetti emojis
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result for emoji in confetti_emojis)
+    # Should contain figlet banner
+    assert len(result.split("\n")) > 2
