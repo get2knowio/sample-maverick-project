@@ -4,6 +4,9 @@ github:
   repo: sample-maverick-project
   default_branch: main
 validation:
+  sync_cmd:
+  - uv
+  - sync
   format_cmd:
   - ruff
   - format
