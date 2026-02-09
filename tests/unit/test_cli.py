@@ -237,3 +237,74 @@ def test_cli_random_with_no_figlet() -> None:
     assert result.exit_code == 0
     # Should have minimal output - just one greeting without banner
     assert len(result.output.strip()) > 0
+
+
+def test_cli_name_option_single_language() -> None:
+    """Test --name option with single language."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--name", "Marie", "-l", "french"])
+    assert result.exit_code == 0
+    assert "Bonjour, Marie !" in result.output
+    # Should not contain default "World"
+    assert "le monde" not in result.output.lower()
+
+
+def test_cli_name_option_multiple_languages() -> None:
+    """Test --name option with multiple languages."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--name", "Alice", "-l", "english,spanish"])
+    assert result.exit_code == 0
+    assert "Hello, Alice!" in result.output
+    assert "¡Hola, Alice!" in result.output
+
+
+def test_cli_name_option_default_world() -> None:
+    """Test that default name is 'World' when --name not specified."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english"])
+    assert result.exit_code == 0
+    assert "Hello, World!" in result.output
+
+
+def test_cli_name_option_with_spaces() -> None:
+    """Test --name option with spaces in the name."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--name", "Dr. Smith", "-l", "english"])
+    assert result.exit_code == 0
+    assert "Hello, Dr. Smith!" in result.output
+
+
+def test_cli_name_option_with_special_characters() -> None:
+    """Test --name option with special characters."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--name", "José", "-l", "spanish"])
+    assert result.exit_code == 0
+    assert "¡Hola, José!" in result.output
+
+
+def test_cli_name_option_with_unicode() -> None:
+    """Test --name option with Unicode characters."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--name", "世界", "-l", "japanese"])
+    assert result.exit_code == 0
+    assert "こんにちは、世界！" in result.output
+
+
+def test_cli_name_option_with_random() -> None:
+    """Test --name option works with --random flag."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--name", "Bob", "--random"])
+    assert result.exit_code == 0
+    # Should contain Bob in some language greeting
+    assert "Bob" in result.output
+    # Should not contain World
+    assert "World" not in result.output
+
+
+def test_cli_name_option_all_languages() -> None:
+    """Test --name option applies to all languages when no filter."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--name", "Everyone"])
+    assert result.exit_code == 0
+    # Should contain Everyone in at least one greeting
+    assert "Everyone" in result.output

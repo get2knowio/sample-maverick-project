@@ -45,7 +45,13 @@ from greet.output import create_console, render_all_greetings, render_greeting
     default=False,
     help="Display exactly one randomly selected language",
 )
-def main(languages: str | None, no_figlet: bool, no_color: bool, random: bool) -> None:
+@click.option(
+    "--name",
+    type=str,
+    default="World",
+    help="Name to substitute in greetings (default: 'World')",
+)
+def main(languages: str | None, no_figlet: bool, no_color: bool, random: bool, name: str) -> None:
     """Multilingual greeting CLI tool.
 
     Display "Hello, World!" in multiple languages with ASCII art flourishes.
@@ -77,7 +83,7 @@ def main(languages: str | None, no_figlet: bool, no_color: bool, random: bool) -
     # Create output configuration with CLI options
     config = OutputConfig(
         languages=language_list,
-        name="World",
+        name=name,
         show_figlet=not no_figlet,
         use_color=not no_color,
         random_mode=random,
