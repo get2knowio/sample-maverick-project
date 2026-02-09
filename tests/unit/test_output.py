@@ -266,3 +266,108 @@ def test_render_fortune_with_color() -> None:
 
     # Should contain the proverb text
     assert "Where there's a will, there's a way." in result
+
+
+def test_render_grid_layout_basic() -> None:
+    """Test basic grid layout rendering."""
+    from greet.output import render_grid_layout
+
+    greetings = [generate_greeting(lang, "World") for lang in LANGUAGES[:4]]
+    config = OutputConfig(show_figlet=False, use_color=False, grid_layout=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=False, width=120)
+
+    render_grid_layout(greetings, config, console)
+    result = output.getvalue()
+
+    # Should contain greetings from all languages
+    assert "Hello, World!" in result
+    assert "Bonjour" in result
+    assert "Hola" in result
+    assert "Hallo" in result
+
+
+def test_render_grid_layout_narrow_terminal() -> None:
+    """Test grid layout with narrow terminal width."""
+    from greet.output import render_grid_layout
+
+    greetings = [generate_greeting(lang, "World") for lang in LANGUAGES[:3]]
+    config = OutputConfig(show_figlet=False, use_color=False, grid_layout=True)
+
+    # Capture output with narrow width
+    output = StringIO()
+    console = Console(file=output, force_terminal=False, width=40)
+
+    render_grid_layout(greetings, config, console)
+    result = output.getvalue()
+
+    # Should still contain all greetings
+    assert "Hello, World!" in result
+    assert "Bonjour" in result
+
+
+def test_render_grid_layout_empty_list() -> None:
+    """Test grid layout with empty greetings list."""
+    from greet.output import render_grid_layout
+
+    greetings: list[Greeting] = []
+    config = OutputConfig(use_color=False, grid_layout=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=False)
+
+    # Should not raise an error
+    render_grid_layout(greetings, config, console)
+    result = output.getvalue()
+
+    # Output should be minimal or empty
+    assert len(result.strip()) == 0
+
+
+def test_render_grid_layout_with_party_mode() -> None:
+    """Test grid layout rendering with party mode enabled."""
+    from greet.output import render_grid_layout
+
+    greetings = [generate_greeting(lang, "World") for lang in LANGUAGES[:2]]
+    config = OutputConfig(
+        show_figlet=False,
+        use_color=True,
+        party_mode=True,
+        grid_layout=True,
+    )
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=True, width=120)
+
+    render_grid_layout(greetings, config, console)
+    result = output.getvalue()
+
+    # Should contain greetings
+    assert "Hello, World!" in result
+    # Should contain flag emojis
+    assert LANGUAGES[0].flag_emoji in result
+    # Should contain confetti emojis
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result for emoji in confetti_emojis)
+
+
+def test_render_all_greetings_with_grid_layout() -> None:
+    """Test render_all_greetings uses grid layout when config.grid_layout is True."""
+    greetings = [generate_greeting(lang, "World") for lang in LANGUAGES[:3]]
+    config = OutputConfig(show_figlet=False, use_color=False, grid_layout=True)
+
+    # Capture output
+    output = StringIO()
+    console = Console(file=output, force_terminal=False, width=120)
+
+    render_all_greetings(greetings, config, console)
+    result = output.getvalue()
+
+    # Should contain all greetings
+    assert "Hello, World!" in result
+    assert "Bonjour" in result
+    assert "Hola" in result

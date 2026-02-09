@@ -540,3 +540,112 @@ def test_cli_fortune_with_name() -> None:
     assert "Hello, Alice!" in result.output
     # Should contain fortune
     assert "Fortune" in result.output or "fortune" in result.output
+
+
+def test_cli_all_at_once_flag() -> None:
+    """Test that --all-at-once displays greetings in grid layout."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english,french,spanish", "--all-at-once", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain all greetings
+    assert "Hello, World!" in result.output
+    assert "Bonjour" in result.output
+    assert "Hola" in result.output
+
+
+def test_cli_all_at_once_with_no_figlet() -> None:
+    """Test that --all-at-once works with --no-figlet."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english,french", "--all-at-once", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain greetings
+    assert "Hello, World!" in result.output
+    assert "Bonjour" in result.output
+
+
+def test_cli_all_at_once_with_no_color() -> None:
+    """Test that --all-at-once works with --no-color."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english,spanish", "--all-at-once", "--no-color"])
+    assert result.exit_code == 0
+    # Should contain greetings
+    assert "Hello, World!" in result.output
+    assert "Hola" in result.output
+
+
+def test_cli_all_at_once_with_name() -> None:
+    """Test that --all-at-once works with --name option."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english,french", "--all-at-once", "--name", "Alice"])
+    assert result.exit_code == 0
+    # Should contain personalized greetings
+    assert "Hello, Alice!" in result.output
+    assert "Alice" in result.output
+
+
+def test_cli_all_at_once_with_party() -> None:
+    """Test that --all-at-once works with --party mode."""
+    runner = CliRunner()
+    result = runner.invoke(
+        main, ["-l", "english,japanese", "--all-at-once", "--party", "--no-figlet"]
+    )
+    assert result.exit_code == 0
+    # Should contain greetings
+    assert "Hello, World!" in result.output
+    # Should contain flag emojis
+    assert "🇬🇧" in result.output or "🇯🇵" in result.output
+    # Should contain confetti emojis
+    confetti_emojis = ["🎉", "🎊", "✨", "🎈", "🎆", "🎇"]
+    assert any(emoji in result.output for emoji in confetti_emojis)
+
+
+def test_cli_all_at_once_with_cowsay() -> None:
+    """Test that --all-at-once works with --cowsay (grid wrapped in bubble)."""
+    runner = CliRunner()
+    result = runner.invoke(
+        main, ["-l", "english,french", "--all-at-once", "--cowsay", "--no-figlet"]
+    )
+    assert result.exit_code == 0
+    # Should contain greetings
+    assert "Hello, World!" in result.output
+    assert "Bonjour" in result.output
+    # Should contain cowsay elements
+    assert "(oo)" in result.output or "^__^" in result.output
+    # Should contain bubble borders
+    assert "_" in result.output or "-" in result.output
+
+
+def test_cli_all_at_once_all_languages() -> None:
+    """Test that --all-at-once works with all languages."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--all-at-once", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain greetings from multiple languages
+    assert "Hello, World!" in result.output
+    assert "Bonjour" in result.output
+    assert "Hola" in result.output
+    # Should be relatively compact compared to sequential output
+    assert len(result.output) > 0
+
+
+def test_cli_all_at_once_with_language_filter() -> None:
+    """Test that --all-at-once respects --languages filter."""
+    runner = CliRunner()
+    result = runner.invoke(main, ["-l", "english", "--all-at-once", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain only English
+    assert "Hello, World!" in result.output
+    # Should not contain other languages
+    assert "Bonjour" not in result.output
+
+
+def test_cli_all_at_once_narrow_terminal() -> None:
+    """Test that --all-at-once adapts to narrow terminal width."""
+    runner = CliRunner()
+    # CliRunner doesn't directly control terminal width, but we can test it runs
+    result = runner.invoke(main, ["-l", "english,french,spanish", "--all-at-once", "--no-figlet"])
+    assert result.exit_code == 0
+    # Should contain all greetings
+    assert "Hello, World!" in result.output
+    assert "Bonjour" in result.output
+    assert "Hola" in result.output

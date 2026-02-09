@@ -70,6 +70,12 @@ from greet.output import create_console, render_all_greetings, render_fortune, r
     default=False,
     help="Append a random multilingual proverb after greetings",
 )
+@click.option(
+    "--all-at-once",
+    is_flag=True,
+    default=False,
+    help="Display greetings in a grid layout rather than sequentially",
+)
 def main(
     languages: str | None,
     no_figlet: bool,
@@ -79,6 +85,7 @@ def main(
     cowsay: bool,
     party: bool,
     fortune: bool,
+    all_at_once: bool,
 ) -> None:
     """Multilingual greeting CLI tool.
 
@@ -118,6 +125,7 @@ def main(
         cowsay=cowsay,
         party_mode=party,
         show_fortune=fortune,
+        grid_layout=all_at_once,
     )
 
     # Create console

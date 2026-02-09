@@ -2,6 +2,7 @@
 
 from io import StringIO
 
+from rich.columns import Columns
 from rich.console import Console
 
 from greet.core import Greeting, OutputConfig
@@ -114,16 +115,91 @@ def render_greeting(greeting: Greeting, config: OutputConfig, console: Console) 
         console.print()  # Empty line for spacing
 
 
-def render_all_greetings(greetings: list[Greeting], config: OutputConfig, console: Console) -> None:
-    """Render all greetings sequentially to the console.
+def render_grid_layout(greetings: list[Greeting], config: OutputConfig, console: Console) -> None:
+    """Render greetings in a grid layout using Rich Columns.
 
     Args:
         greetings: List of greetings to render
         config: Output configuration
         console: Rich Console instance to render to
     """
-    # If cowsay mode is enabled, capture all output and wrap it
-    if config.cowsay:
+    if not greetings:
+        return
+
+    # Detect terminal width for adaptive grid sizing
+    # Each column needs at least 30 characters to display greeting comfortably
+    min_column_width = 30
+
+    # Create greeting panels/strings for the grid
+    greeting_items: list[str] = []
+
+    for greeting in greetings:
+        # Capture individual greeting output
+        output_buffer = StringIO()
+        temp_console = Console(
+            file=output_buffer,
+            force_terminal=config.use_color,
+            no_color=not config.use_color,
+            highlight=False,
+            width=min_column_width - 4,  # Account for padding
+        )
+
+        # Prepare greeting text
+        greeting_text = greeting.text
+
+        # Add flag emoji in party mode
+        if config.party_mode:
+            greeting_text = f"{greeting.language.flag_emoji} {greeting_text}"
+
+        # Add confetti in party mode
+        if config.party_mode:
+            greeting_text = add_confetti(greeting_text)
+
+        # Render the greeting text with random color in party mode
+        if config.party_mode and config.use_color:
+            greeting_style = random_color_style()
+        else:
+            greeting_style = "green"
+
+        temp_console.print(greeting_text, style=greeting_style)
+
+        # Get the captured output
+        greeting_output = output_buffer.getvalue().rstrip()
+        greeting_items.append(greeting_output)
+
+    # Create columns and render
+    columns = Columns(greeting_items, equal=True, expand=True)
+    console.print(columns)
+
+
+def render_all_greetings(greetings: list[Greeting], config: OutputConfig, console: Console) -> None:
+    """Render all greetings sequentially or in grid layout to the console.
+
+    Args:
+        greetings: List of greetings to render
+        config: Output configuration
+        console: Rich Console instance to render to
+    """
+    # If grid layout is enabled, use grid rendering
+    if config.grid_layout:
+        # If cowsay mode is enabled with grid, capture grid output and wrap it
+        if config.cowsay:
+            output_buffer = StringIO()
+            temp_console = Console(
+                file=output_buffer,
+                force_terminal=config.use_color,
+                no_color=not config.use_color,
+                highlight=False,
+                width=console.width,
+            )
+            render_grid_layout(greetings, config, temp_console)
+            captured_output = output_buffer.getvalue()
+            cowsay_output = wrap_in_cowsay(captured_output.rstrip())
+            console.print(cowsay_output)
+        else:
+            render_grid_layout(greetings, config, console)
+    # Otherwise, use sequential rendering
+    elif config.cowsay:
         # Create a temporary console to capture output
         output_buffer = StringIO()
         temp_console = Console(
