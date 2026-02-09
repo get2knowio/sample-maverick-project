@@ -5,5 +5,5 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/scripts/test-setup.sh"
 
 # Run the feature workflow with session logging
-"${MAVERICK_BIN}" fly feature -i branch_name=001-greet-cli \
+"${MAVERICK_BIN}" fly run feature -i branch_name=001-greet-cli \
   --session-log "${REPO_ROOT}/session.jsonl"
