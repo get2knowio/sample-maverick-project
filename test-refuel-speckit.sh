@@ -25,8 +25,8 @@ echo "=== Running refuel-speckit workflow (live) ==="
 echo ""
 echo "=== Verifying bead creation ==="
 BEADS_JSON=$(bd list --json)
-EPIC_COUNT=$(echo "${BEADS_JSON}" | jq '[.[] | select(.type == "epic")] | length')
-TASK_COUNT=$(echo "${BEADS_JSON}" | jq '[.[] | select(.type == "task")] | length')
+EPIC_COUNT=$(echo "${BEADS_JSON}" | jq '[.[] | select(.issue_type == "epic")] | length')
+TASK_COUNT=$(echo "${BEADS_JSON}" | jq '[.[] | select(.issue_type == "task")] | length')
 echo "  Epics: ${EPIC_COUNT}"
 echo "  Tasks: ${TASK_COUNT}"
 [[ "${EPIC_COUNT}" -ge 1 ]] || { echo "FAIL: No epic bead created"; exit 1; }

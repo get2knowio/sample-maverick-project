@@ -14,7 +14,7 @@ echo "=== Creating beads from spec ==="
 # 2. Capture the epic ID for fly
 echo ""
 echo "=== Locating epic bead ==="
-EPIC_ID=$(bd list --json | jq -r '[.[] | select(.type == "epic")][0].id')
+EPIC_ID=$(bd list --json | jq -r '[.[] | select(.issue_type == "epic")][0].id')
 if [[ -z "${EPIC_ID}" || "${EPIC_ID}" == "null" ]]; then
   echo "FAIL: No epic bead found after refuel speckit"
   exit 1
