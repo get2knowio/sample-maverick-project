@@ -32,12 +32,7 @@ echo "  Tasks: ${TASK_COUNT}"
 [[ "${EPIC_COUNT}" -ge 1 ]] || { echo "FAIL: No epic bead created"; exit 1; }
 [[ "${TASK_COUNT}" -ge 1 ]] || { echo "FAIL: No task beads created"; exit 1; }
 
-# 5. Verify dependency graph
-echo ""
-echo "=== Dependency tree ==="
-bd dep-tree
-
-# 6. Verify ready/blocked status
+# 5. Verify ready/blocked status
 echo ""
 echo "=== Structural dependency verification ==="
 READY_COUNT=$(bd ready --json | jq 'length')
