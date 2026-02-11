@@ -23,6 +23,7 @@ export GIT_PAGER=
 # Copy .env from maverick project
 cp /workspaces/maverick/.env "${REPO_ROOT}/.env"
 
-# Initialize maverick project config
+# Initialize maverick project config and beads workspace
 cd "${REPO_ROOT}"
 "${MAVERICK_BIN}" init --no-detect --type python --force
+bd init --force 2>/dev/null || true
