@@ -9,7 +9,7 @@ SPEC="001-greet-cli"
 # 1. Create beads from spec (prerequisite: populates epic + task beads)
 echo "=== Creating beads from spec ==="
 "${MAVERICK_BIN}" refuel speckit "${SPEC}" \
-  --session-log "${REPO_ROOT}/refuel-session.jsonl"
+  --session-log "/tmp/refuel-session.jsonl"
 
 # 2. Capture the epic ID for fly
 echo ""
@@ -36,7 +36,7 @@ echo ""
 echo "=== Running fly workflow (live) ==="
 "${MAVERICK_BIN}" fly --epic "${EPIC_ID}" \
   --skip-review --max-beads 5 \
-  --session-log "${REPO_ROOT}/fly-beads-session.jsonl"
+  --session-log "/tmp/fly-beads-session.jsonl"
 
 # 6. Verify bead progress
 echo ""

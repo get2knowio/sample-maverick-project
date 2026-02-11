@@ -19,7 +19,7 @@ echo "=== Running refuel-speckit workflow (dry-run) ==="
 echo ""
 echo "=== Running refuel-speckit workflow (live) ==="
 "${MAVERICK_BIN}" refuel speckit "${SPEC}" \
-  --session-log "${REPO_ROOT}/refuel-session.jsonl"
+  --session-log "/tmp/refuel-session.jsonl"
 
 # 4. Verify bead creation
 echo ""
