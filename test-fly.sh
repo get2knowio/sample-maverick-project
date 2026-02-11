@@ -4,14 +4,14 @@ set -euo pipefail
 # Shared setup: reset repo, copy .env, maverick init
 source "$(dirname "${BASH_SOURCE[0]}")/scripts/test-setup.sh"
 
-SPEC_DIR="${REPO_ROOT}/specs/001-greet-cli"
+SPEC="001-greet-cli"
 
 # 1. Create beads from spec (prerequisite: populates epic + task beads)
 echo "=== Creating beads from spec ==="
-"${MAVERICK_BIN}" refuel speckit "${SPEC_DIR}" \
+"${MAVERICK_BIN}" refuel speckit "${SPEC}" \
   --session-log "${REPO_ROOT}/refuel-session.jsonl"
 
-# 2. Capture the epic ID for fly beads
+# 2. Capture the epic ID for fly
 echo ""
 echo "=== Locating epic bead ==="
 EPIC_ID=$(bd list --json | jq -r '[.[] | select(.type == "epic")][0].id')
@@ -23,19 +23,18 @@ echo "  Epic ID: ${EPIC_ID}"
 
 # 3. List workflow steps (smoke test for workflow discovery + YAML parsing)
 echo ""
-echo "=== Listing fly-beads workflow steps ==="
-"${MAVERICK_BIN}" fly beads --epic "${EPIC_ID}" --branch 001-greet-cli --list-steps
+echo "=== Listing fly workflow steps ==="
+"${MAVERICK_BIN}" fly --epic "${EPIC_ID}" --list-steps
 
 # 4. Dry-run (shows execution plan, validates inputs without mutations)
 echo ""
-echo "=== Running fly-beads workflow (dry-run) ==="
-"${MAVERICK_BIN}" fly beads --epic "${EPIC_ID}" --branch 001-greet-cli \
-  --dry-run
+echo "=== Running fly workflow (dry-run) ==="
+"${MAVERICK_BIN}" fly --epic "${EPIC_ID}" --dry-run
 
 # 5. Live run (implements beads, commits, closes)
 echo ""
-echo "=== Running fly-beads workflow (live) ==="
-"${MAVERICK_BIN}" fly beads --epic "${EPIC_ID}" --branch 001-greet-cli \
+echo "=== Running fly workflow (live) ==="
+"${MAVERICK_BIN}" fly --epic "${EPIC_ID}" \
   --skip-review --max-beads 5 \
   --session-log "${REPO_ROOT}/fly-beads-session.jsonl"
 

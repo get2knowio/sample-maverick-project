@@ -4,21 +4,21 @@ set -euo pipefail
 # Shared setup: reset repo, copy .env, maverick init
 source "$(dirname "${BASH_SOURCE[0]}")/scripts/test-setup.sh"
 
-SPEC_DIR="${REPO_ROOT}/specs/001-greet-cli"
+SPEC="001-greet-cli"
 
 # 1. List workflow steps (smoke test for workflow discovery + YAML parsing)
 echo "=== Listing refuel-speckit workflow steps ==="
-"${MAVERICK_BIN}" refuel speckit "${SPEC_DIR}" --list-steps
+"${MAVERICK_BIN}" refuel speckit "${SPEC}" --list-steps
 
-# 2. Dry-run (shows execution plan, no bd required)
+# 2. Dry-run (shows execution plan, no bd/git mutations)
 echo ""
 echo "=== Running refuel-speckit workflow (dry-run) ==="
-"${MAVERICK_BIN}" refuel speckit "${SPEC_DIR}" --dry-run
+"${MAVERICK_BIN}" refuel speckit "${SPEC}" --dry-run
 
-# 3. Live run (preflight validates bd, creates real beads)
+# 3. Live run (preflight validates bd, creates real beads, commits & merges)
 echo ""
 echo "=== Running refuel-speckit workflow (live) ==="
-"${MAVERICK_BIN}" refuel speckit "${SPEC_DIR}" \
+"${MAVERICK_BIN}" refuel speckit "${SPEC}" \
   --session-log "${REPO_ROOT}/refuel-session.jsonl"
 
 # 4. Verify bead creation
