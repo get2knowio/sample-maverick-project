@@ -26,6 +26,9 @@ cp /workspaces/maverick/.env "${REPO_ROOT}/.env"
 # Clean stale stealth-mode exclusions (bd now runs in normal mode)
 sed -i '/\.beads\//d' "${REPO_ROOT}/.git/info/exclude" 2>/dev/null || true
 
-# Initialize maverick project config and beads workspace
+# Clean any stale maverick workspace from previous runs
 cd "${REPO_ROOT}"
+"${MAVERICK_BIN}" workspace clean --yes 2>/dev/null || true
+
+# Initialize maverick project config and beads workspace
 "${MAVERICK_BIN}" init --no-detect --type python --force
