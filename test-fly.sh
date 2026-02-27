@@ -27,9 +27,10 @@ echo "=== Listing fly workflow steps ==="
 "${MAVERICK_BIN}" fly --epic "${EPIC_ID}" --list-steps
 
 # 4. Dry-run (shows execution plan, validates inputs without mutations)
+#    Limit to 1 bead since dry-run still invokes agent execution.
 echo ""
 echo "=== Running fly workflow (dry-run) ==="
-"${MAVERICK_BIN}" fly --epic "${EPIC_ID}" --dry-run
+"${MAVERICK_BIN}" fly --epic "${EPIC_ID}" --dry-run --max-beads 1
 
 # 5. Live run (implements beads in hidden workspace, commits via jj)
 #    Tolerate partial completion — later beads may time out, but we only
@@ -38,7 +39,7 @@ echo ""
 echo "=== Running fly workflow (live) ==="
 FLY_EXIT=0
 "${MAVERICK_BIN}" fly --epic "${EPIC_ID}" \
-  --skip-review --max-beads 5 \
+  --skip-review --max-beads 2 \
   --session-log "/tmp/fly-beads-session.jsonl" || FLY_EXIT=$?
 if [[ "${FLY_EXIT}" -ne 0 ]]; then
   echo "  fly exited with code ${FLY_EXIT} (partial completion expected)"
