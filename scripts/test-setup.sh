@@ -17,6 +17,11 @@ MAVERICK_BIN="/workspaces/maverick/.venv/bin/maverick"
 export GH_PAGER=
 export GIT_PAGER=
 
+# Stop any running dolt server before reset — git clean -fdx in reset-repo.sh
+# deletes .beads/dolt/ (the data dir) leaving the server with a dangling ref.
+# Killing it first lets bd init (via maverick init) start a fresh instance.
+pkill -f 'dolt sql-server' 2>/dev/null && sleep 1 || true
+
 # Reset repo to baseline
 "${REPO_ROOT}/scripts/reset-repo.sh" --force
 
