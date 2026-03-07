@@ -4,7 +4,7 @@ set -euo pipefail
 # Shared setup: reset repo, copy .env, maverick init
 source "$(dirname "${BASH_SOURCE[0]}")/scripts/test-setup.sh"
 
-PRD="specs/001-greet-cli/spec.md"
+PRD="docs/greet-cli-prd.md"
 PLAN_NAME="greet-cli"
 PLAN_DIR=".maverick/plans/${PLAN_NAME}"
 FLIGHT_PLAN="${PLAN_DIR}/flight-plan.md"
