@@ -8,17 +8,17 @@ SPEC="001-greet-cli"
 
 # 1. List workflow steps (smoke test for workflow discovery + YAML parsing)
 echo "=== Listing refuel-speckit workflow steps ==="
-"${MAVERICK_BIN}" refuel speckit "${SPEC}" --list-steps
+"${MAVERICK_BIN}" refuel --from speckit "${SPEC}" --list-steps
 
 # 2. Dry-run (shows execution plan, no bd/git mutations)
 echo ""
 echo "=== Running refuel-speckit workflow (dry-run) ==="
-"${MAVERICK_BIN}" refuel speckit "${SPEC}" --dry-run
+"${MAVERICK_BIN}" refuel --from speckit "${SPEC}" --dry-run
 
 # 3. Live run (preflight validates bd, creates real beads, commits & merges)
 echo ""
 echo "=== Running refuel-speckit workflow (live) ==="
-"${MAVERICK_BIN}" refuel speckit "${SPEC}" \
+"${MAVERICK_BIN}" refuel --from speckit "${SPEC}" \
   --session-log "/tmp/refuel-session.jsonl"
 
 # 4. Verify bead creation

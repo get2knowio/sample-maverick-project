@@ -8,7 +8,7 @@ SPEC="001-greet-cli"
 
 # 1. Create beads from spec (prerequisite: populates epic + task beads)
 echo "=== Creating beads from spec ==="
-"${MAVERICK_BIN}" refuel speckit "${SPEC}" \
+"${MAVERICK_BIN}" refuel --from speckit "${SPEC}" \
   --session-log "/tmp/refuel-session.jsonl"
 
 # 2. Capture the epic ID for fly
