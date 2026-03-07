@@ -42,6 +42,10 @@ echo "  Epics: ${EPIC_COUNT}, Tasks: ${TASK_COUNT}"
 EPIC_ID=$(echo "${BEADS_JSON}" | jq -r '[.[] | select(.issue_type == "epic")][0].id')
 echo "  Epic ID: ${EPIC_ID}"
 
+echo ""
+echo "=== Brief: Beads created ==="
+"${MAVERICK_BIN}" brief --epic "${EPIC_ID}"
+
 # ── Phase 4: Fly — implement a subset of beads ─────────────
 echo ""
 echo "=== Phase 4: Fly (max 3 beads, skip review) ==="
