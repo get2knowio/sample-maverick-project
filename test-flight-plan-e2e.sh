@@ -6,7 +6,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/scripts/test-setup.sh"
 
 PRD="specs/001-greet-cli/spec.md"
 PLAN_NAME="greet-cli"
-FLIGHT_PLAN=".maverick/flight-plans/${PLAN_NAME}.md"
+PLAN_DIR=".maverick/plans/${PLAN_NAME}"
+FLIGHT_PLAN="${PLAN_DIR}/flight-plan.md"
 
 # ── Phase 1: Generate flight plan from PRD ──────────────────
 echo "=== Phase 1: Generating flight plan from PRD ==="
@@ -19,21 +20,20 @@ echo "  Flight plan created at ${FLIGHT_PLAN}"
 # ── Phase 2: Validate generated flight plan ─────────────────
 echo ""
 echo "=== Phase 2: Validating generated flight plan ==="
-"${MAVERICK_BIN}" plan validate "${FLIGHT_PLAN}"
+"${MAVERICK_BIN}" plan validate "${PLAN_NAME}"
 
 # ── Phase 3: Refuel — decompose into work units + beads ─────
 echo ""
 echo "=== Phase 3a: Refuel dry-run ==="
-"${MAVERICK_BIN}" refuel plan "${FLIGHT_PLAN}" --dry-run
+"${MAVERICK_BIN}" refuel "${PLAN_NAME}" --dry-run
 
-WU_DIR=".maverick/work-units/${PLAN_NAME}"
-WU_COUNT=$(find "${WU_DIR}" -name "*.md" 2>/dev/null | wc -l)
+WU_COUNT=$(find "${PLAN_DIR}" -name "[0-9][0-9][0-9]-*.md" 2>/dev/null | wc -l)
 echo "  Work unit files: ${WU_COUNT}"
 [[ "${WU_COUNT}" -ge 1 ]] || { echo "FAIL: No work unit files"; exit 1; }
 
 echo ""
 echo "=== Phase 3b: Refuel live ==="
-"${MAVERICK_BIN}" refuel plan "${FLIGHT_PLAN}" \
+"${MAVERICK_BIN}" refuel "${PLAN_NAME}" \
   --session-log /tmp/refuel-flight-plan-session.jsonl
 
 BEADS_JSON=$(bd list --json)
