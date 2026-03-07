@@ -28,17 +28,13 @@ ${MAVERICK} plan validate "${PLAN_NAME}"
 
 # ── Phase 3: Refuel — decompose into work units + beads ─────
 echo ""
-echo "=== Phase 3a: Refuel dry-run ==="
-${MAVERICK} refuel "${PLAN_NAME}" --dry-run
+echo "=== Phase 3: Refuel ==="
+${MAVERICK} refuel "${PLAN_NAME}" \
+  --session-log /tmp/refuel-flight-plan-copilot-session.jsonl
 
 WU_COUNT=$(find "${PLAN_DIR}" -name "[0-9][0-9][0-9]-*.md" 2>/dev/null | wc -l)
 echo "  Work unit files: ${WU_COUNT}"
 [[ "${WU_COUNT}" -ge 1 ]] || { echo "FAIL: No work unit files"; exit 1; }
-
-echo ""
-echo "=== Phase 3b: Refuel live ==="
-${MAVERICK} refuel "${PLAN_NAME}" \
-  --session-log /tmp/refuel-flight-plan-copilot-session.jsonl
 
 BEADS_JSON=$(bd list --json)
 EPIC_COUNT=$(echo "${BEADS_JSON}" | jq '[.[] | select(.issue_type == "epic")] | length')
