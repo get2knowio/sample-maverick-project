@@ -10,7 +10,7 @@ FLIGHT_PLAN=".maverick/flight-plans/${PLAN_NAME}.md"
 
 # ── Phase 1: Generate flight plan from PRD ──────────────────
 echo "=== Phase 1: Generating flight plan from PRD ==="
-"${MAVERICK_BIN}" flight-plan generate "${PLAN_NAME}" \
+"${MAVERICK_BIN}" plan generate "${PLAN_NAME}" \
   --from-prd "${PRD}" \
   --session-log /tmp/generate-flight-plan-session.jsonl
 [[ -f "${FLIGHT_PLAN}" ]] || { echo "FAIL: Flight plan not created"; exit 1; }
@@ -19,12 +19,12 @@ echo "  Flight plan created at ${FLIGHT_PLAN}"
 # ── Phase 2: Validate generated flight plan ─────────────────
 echo ""
 echo "=== Phase 2: Validating generated flight plan ==="
-"${MAVERICK_BIN}" flight-plan validate "${FLIGHT_PLAN}"
+"${MAVERICK_BIN}" plan validate "${FLIGHT_PLAN}"
 
 # ── Phase 3: Refuel — decompose into work units + beads ─────
 echo ""
 echo "=== Phase 3a: Refuel dry-run ==="
-"${MAVERICK_BIN}" refuel flight-plan "${FLIGHT_PLAN}" --dry-run
+"${MAVERICK_BIN}" refuel plan "${FLIGHT_PLAN}" --dry-run
 
 WU_DIR=".maverick/work-units/${PLAN_NAME}"
 WU_COUNT=$(find "${WU_DIR}" -name "*.md" 2>/dev/null | wc -l)
@@ -33,7 +33,7 @@ echo "  Work unit files: ${WU_COUNT}"
 
 echo ""
 echo "=== Phase 3b: Refuel live ==="
-"${MAVERICK_BIN}" refuel flight-plan "${FLIGHT_PLAN}" \
+"${MAVERICK_BIN}" refuel plan "${FLIGHT_PLAN}" \
   --session-log /tmp/refuel-flight-plan-session.jsonl
 
 BEADS_JSON=$(bd list --json)
