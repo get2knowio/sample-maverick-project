@@ -6,15 +6,12 @@
 # Usage: ./scripts/reset-repo.sh [--force]
 #   --force: Skip confirmation prompt
 #
-# Baseline is defined by tags: baseline/main and baseline/001-greet-cli
-# These tags are pushed to origin and used as the source of truth.
+# Baseline is defined by the tag: baseline/main
+# This tag is pushed to origin and used as the source of truth.
 #
 set -euo pipefail
 
-# Branch configuration
-FEATURE_BRANCH="001-greet-cli"
 MAIN_TAG="baseline/main"
-FEATURE_TAG="baseline/$FEATURE_BRANCH"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -40,8 +37,8 @@ fi
 # Confirmation prompt
 if [[ "$FORCE" != "true" ]]; then
     echo "This will:"
-    echo "  - Delete ALL local branches except 'main' and '$FEATURE_BRANCH'"
-    echo "  - Hard reset 'main' and '$FEATURE_BRANCH' to baseline commits"
+    echo "  - Delete ALL local branches except 'main'"
+    echo "  - Hard reset 'main' to the baseline commit"
     echo "  - Force push to origin (resetting remote state)"
     echo "  - Remove all untracked files and directories"
     echo ""
@@ -68,9 +65,9 @@ git fetch origin --prune
 log_info "Checking out main..."
 git checkout main --force
 
-# 4. Delete all local branches except main and the feature branch
+# 4. Delete all local branches except main
 log_info "Deleting extra local branches..."
-for branch in $(git branch | grep -v "^\*" | grep -v "main" | grep -v "$FEATURE_BRANCH"); do
+for branch in $(git branch | grep -v "^\*" | grep -v "main"); do
     branch_name=$(echo "$branch" | xargs)
     if [[ -n "$branch_name" ]]; then
         log_warn "Deleting branch: $branch_name"
@@ -78,34 +75,23 @@ for branch in $(git branch | grep -v "^\*" | grep -v "main" | grep -v "$FEATURE_
     fi
 done
 
-# 5. Fetch baseline tags
-log_info "Fetching baseline tags..."
+# 5. Fetch baseline tag
+log_info "Fetching baseline tag..."
 git fetch origin "refs/tags/$MAIN_TAG:refs/tags/$MAIN_TAG" --force 2>/dev/null || true
-git fetch origin "refs/tags/$FEATURE_TAG:refs/tags/$FEATURE_TAG" --force 2>/dev/null || true
 
-# Verify tags exist
+# Verify tag exists
 if ! git rev-parse "$MAIN_TAG" >/dev/null 2>&1; then
     log_error "Tag $MAIN_TAG not found. Cannot reset."
-    exit 1
-fi
-if ! git rev-parse "$FEATURE_TAG" >/dev/null 2>&1; then
-    log_error "Tag $FEATURE_TAG not found. Cannot reset."
     exit 1
 fi
 
 # 6. Hard reset main to baseline tag
 log_info "Resetting main to $MAIN_TAG..."
-git checkout main --force
 git reset --hard "$MAIN_TAG"
 
-# 7. Reset feature branch to its baseline tag
-log_info "Resetting $FEATURE_BRANCH to $FEATURE_TAG..."
-git checkout "$FEATURE_BRANCH" --force 2>/dev/null || git checkout -b "$FEATURE_BRANCH" "$FEATURE_TAG"
-git reset --hard "$FEATURE_TAG"
-
-# 8. Delete remote branches that shouldn't exist (except main and feature branch)
+# 7. Delete remote branches that shouldn't exist (except main)
 log_info "Cleaning up remote branches..."
-for remote_branch in $(git branch -r | grep "origin/" | grep -v "origin/main" | grep -v "origin/$FEATURE_BRANCH" | grep -v "origin/HEAD"); do
+for remote_branch in $(git branch -r | grep "origin/" | grep -v "origin/main" | grep -v "origin/HEAD"); do
     branch_name=$(echo "$remote_branch" | sed 's|origin/||' | xargs)
     if [[ -n "$branch_name" ]]; then
         log_warn "Deleting remote branch: $branch_name"
@@ -113,26 +99,23 @@ for remote_branch in $(git branch -r | grep "origin/" | grep -v "origin/main" | 
     fi
 done
 
-# 9. Force push main and feature branch to ensure remote matches baseline
+# 8. Force push main to ensure remote matches baseline
 log_info "Force pushing main to origin..."
-git checkout main --force
 git push origin main --force
 
-log_info "Force pushing $FEATURE_BRANCH to origin..."
-git checkout "$FEATURE_BRANCH" --force
-git push origin "$FEATURE_BRANCH" --force
-
-# 10. Ensure baseline tags are on origin
-log_info "Pushing baseline tags to origin..."
+# 9. Ensure baseline tag is on origin
+log_info "Pushing baseline tag to origin..."
 git push origin "$MAIN_TAG" --force
-git push origin "$FEATURE_TAG" --force
 
-# 11. Clean untracked files and directories
+# 10. Clean untracked files and directories
 log_info "Cleaning untracked files..."
 git clean -fdx
 
-# 12. Stay on feature branch
-git checkout "$FEATURE_BRANCH" --force
+# 11. Re-initialize bd if .dolt is missing after clean
+if [[ ! -d ".dolt" ]] && command -v bd >/dev/null 2>&1; then
+    log_info "Re-initializing bd..."
+    bd init 2>/dev/null || true
+fi
 
 log_info "Repository reset complete!"
 echo ""
