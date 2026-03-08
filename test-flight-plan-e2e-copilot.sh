@@ -55,7 +55,7 @@ echo ""
 echo "=== Phase 4: Fly (max 3 beads, skip review) ==="
 FLY_EXIT=0
 ${MAVERICK} fly --epic "${EPIC_ID}" \
-  --skip-review --max-beads 3 \
+  --max-beads 3 \
   --session-log /tmp/fly-flight-plan-copilot-session.jsonl || FLY_EXIT=$?
 if [[ "${FLY_EXIT}" -ne 0 ]]; then
   echo "  fly exited ${FLY_EXIT} (partial completion tolerated)"
@@ -70,7 +70,7 @@ ${MAVERICK} workspace status
 # ── Phase 5: Land — push changes ────────────────────────────
 echo ""
 echo "=== Phase 5: Land ==="
-${MAVERICK} land --yes --no-curate
+${MAVERICK} land --yes
 
 git fetch origin
 git log origin/main --oneline -5
