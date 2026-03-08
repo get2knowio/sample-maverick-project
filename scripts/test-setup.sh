@@ -37,3 +37,6 @@ cd "${REPO_ROOT}"
 
 # Initialize maverick project config and beads workspace
 "${MAVERICK_BIN}" init --no-detect --type python --force
+
+# Restore the curated test config (init --force overwrites maverick.yaml with a bare one)
+cp "${REPO_ROOT}/maverick.test.yaml" "${REPO_ROOT}/maverick.yaml"
