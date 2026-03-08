@@ -1,8 +1,195 @@
-project_type: python
+# =============================================================================
+# Maverick Configuration — Multi-Provider (Claude + Copilot + Gemini)
+# =============================================================================
+# Use with: maverick fly, maverick land, maverick refuel, etc.
+#
+# Config precedence (highest → lowest):
+#   1. Environment variables  (MAVERICK_GITHUB__OWNER, MAVERICK_MODEL__MAX_TOKENS, …)
+#   2. This project config    (./maverick.yaml or -c <path>)
+#   3. User config             (~/.config/maverick/config.yaml)
+#   4. Built-in defaults
+#
+# All sections are optional — omitted values use built-in defaults.
+# Unknown keys are silently ignored.
+
+# -- GitHub Integration -------------------------------------------------------
+# Repository identity used for PR creation, issue management, and labels.
 github:
   owner: get2knowio
   repo: sample-maverick-project
-  default_branch: main
+  default_branch: main                # Branch PRs target (default: "main")
+
+# -- Agent Providers ----------------------------------------------------------
+# ACP (Agent Communication Protocol) providers available to Maverick.
+# Built-in providers ("claude", "copilot", "gemini") need no command — they
+# are resolved automatically. Mark exactly one provider as default: true.
+#
+# Three providers balance usage across subscriptions:
+#   Claude Code Max  → Opus for critical reasoning, Sonnet for reviews
+#   Copilot Pro      → GPT-5.3-Codex for implementation, free models for generators
+#   Gemini Pro       → Gemini 3.1 Pro for codebase exploration
+#
+# Provider options:
+#   command: [...]                    # Only for custom/non-built-in providers
+#   default: true                     # Exactly one provider must be default
+#   default_model: model-id           # Lowest-precedence model default
+#   permission_mode: auto_approve     # auto_approve | deny_dangerous | interactive
+#   env:                              # Extra env vars for the provider subprocess
+#     SOME_VAR: "value"
+agent_providers:
+  claude:
+    default: true
+    default_model: claude-sonnet-4-6
+    permission_mode: auto_approve
+  copilot:
+    default: false
+    default_model: gpt-5.3-codex
+    permission_mode: auto_approve
+  gemini:
+    default: false
+    default_model: gemini-3.1-pro-preview
+    permission_mode: auto_approve
+
+# -- Model Defaults -----------------------------------------------------------
+# Global model settings. Applied to all agent steps unless overridden by
+# per-step (steps:) or per-agent (agents:) config.
+model:
+  model_id: claude-sonnet-4-6          # Default model for all agent steps
+  max_tokens: 64000                    # Max OUTPUT tokens per response (1–200000)
+  temperature: 0.0                     # Sampling temperature (0.0–1.0)
+
+# -- Per-Agent Overrides -------------------------------------------------------
+# Override model settings for specific agent roles. These sit between the
+# global model: defaults and per-step steps: overrides in precedence.
+#
+# Example:
+#   agents:
+#     implementer:
+#       model_id: claude-opus-4-6      # Use Opus for implementation
+#       max_tokens: 64000
+#       temperature: 0.0
+#     unified_reviewer:
+#       model_id: claude-haiku-4-5     # Use Haiku for faster reviews
+#       temperature: 0.2
+agents:
+  # Planning agents — Opus for critical architectural reasoning
+  decomposer:
+    model_id: claude-opus-4-6
+  flight_plan_generator:
+    model_id: claude-opus-4-6
+
+# -- Per-Step Overrides --------------------------------------------------------
+# Override execution settings for individual workflow steps.
+# Step names: implement, review, validate, commit, preflight, etc.
+#
+# Precedence for model/provider resolution (highest → lowest):
+#   1. steps.<step_name>  (this section)
+#   2. agents.<agent_name>
+#   3. model (global)
+#   4. agent_providers.<name>.default_model
+#
+# Step options:
+#   provider: copilot                  # Use a different provider for this step
+#   model_id: gpt-5-mini              # Model for that provider
+#   timeout: 600                       # Step timeout in seconds
+#   max_retries: 3                     # Retry attempts on failure
+#   temperature: 0.1                   # Override sampling temperature
+#   autonomy: consultant               # operator | consultant | autopilot
+#   allowed_tools: [Read, Edit]        # Restrict available tools (null = all)
+#   prompt_suffix: "Extra instructions appended to system prompt"
+#   prompt_file: path/to/extra.md      # Mutually exclusive with prompt_suffix
+steps:
+  # --- Tier 1: Heavy token consumers → Copilot ---
+  implement:
+    provider: copilot
+    model_id: gpt-5.3-codex            # Code-specialized, 1x cost on Copilot
+    timeout: 600
+  simple-fix:
+    provider: copilot
+    model_id: gpt-5.3-codex            # 1x cost
+  # --- Tier 1: Parallel reviewers — different providers for cross-checking ---
+  completeness_review:
+    provider: copilot
+    model_id: gpt-5.4                  # Requirements coverage, 1x cost
+  correctness_review:
+    provider: claude
+    model_id: claude-sonnet-4-6        # Technical precision on Claude
+
+  # --- Tier 2: Targeted fixers → Copilot cheap models ---
+  fix:
+    provider: copilot
+    model_id: claude-haiku-4-5-20251001  # 0.33x cost on Copilot
+
+  # --- Tier 3: Briefing agents — spread across all 3 providers ---
+  # Generate Flight Plan preflight briefing
+  scopist:
+    provider: gemini
+    model_id: gemini-3.1-pro-preview   # Large context for codebase scanning
+  codebase_analyst:
+    provider: gemini
+    model_id: gemini-3.1-pro-preview
+  criteria_writer:
+    provider: claude
+    model_id: claude-sonnet-4-6        # Precision for measurable criteria
+  preflight_contrarian:
+    provider: claude
+    model_id: claude-sonnet-4-6        # Devil's advocate reasoning
+
+  # Refuel Maverick briefing room
+  navigator:
+    provider: gemini
+    model_id: gemini-3.1-pro-preview   # Architecture exploration
+  structuralist:
+    provider: copilot
+    model_id: gpt-5.4                  # Structured type reasoning, 1x cost
+  recon:
+    provider: gemini
+    model_id: gemini-3.1-pro-preview   # Risk scanning across codebase
+  contrarian:
+    provider: claude
+    model_id: claude-sonnet-4-6
+
+  # --- Tier 4: Curator → Copilot free model ---
+  curate:
+    provider: copilot
+    model_id: gpt-5-mini               # 0x cost — free on Copilot
+
+  # --- Tier 5: Generators → Copilot free/cheap models ---
+  commit-message:
+    provider: copilot
+    model_id: gpt-5-mini               # 0x cost
+  pr-description:
+    provider: copilot
+    model_id: gpt-5-mini               # 0x cost
+  pr-title:
+    provider: copilot
+    model_id: gpt-5-mini               # 0x cost
+  bead-enricher:
+    provider: copilot
+    model_id: gpt-4.1                  # 0x cost
+  dependency-extractor:
+    provider: copilot
+    model_id: gpt-5-mini              # 0x cost
+  code-analyzer:
+    provider: copilot
+    model_id: gpt-5.1-codex-mini       # 0.33x cost
+  error-explainer:
+    provider: copilot
+    model_id: gpt-5-mini               # 0x cost
+
+# -- Prompt Overrides ----------------------------------------------------------
+# Append extra instructions to agent system prompts per step.
+# Alternative to steps.<name>.prompt_suffix — cannot use both for the same step.
+#
+# prompts:
+#   implement:
+#     prompt_suffix: "Always write tests before implementation code."
+#   review:
+#     prompt_file: .maverick/review-guidelines.md
+
+# -- Validation Commands -------------------------------------------------------
+# Commands run during the validate-and-fix loop after implementation.
+# Each is a list of args passed to subprocess (no shell expansion).
 validation:
   sync_cmd:
   - uv
@@ -23,15 +210,60 @@ validation:
   - pytest
   - -x
   - --tb=short
-  timeout_seconds: 300
-  max_errors: 50
-model:
-  model_id: claude-sonnet-4-5-20250929
-  max_tokens: 64000
-  temperature: 0.0
+  timeout_seconds: 300                            # Max seconds per command (30–600)
+  max_errors: 50                                  # Max errors returned per stage (1–500)
+  # project_root: /path/to/root                   # Override cwd for commands
+
+# -- Preflight Checks ---------------------------------------------------------
+# Settings for the preflight step that validates tools/creds before workflows.
+#
+# preflight:
+#   timeout_per_check: 5.0          # Max seconds per check (default: 5.0)
+#   fail_on_warning: false          # Treat warnings as errors (default: false)
+#   custom_tools:                   # Extra binaries to check for
+#     - name: Docker
+#       command: docker
+#       required: true
+#       hint: "Install from https://docker.com/"
+
+# -- Workspace ----------------------------------------------------------------
+# Hidden jj workspace settings for `maverick fly` (isolated dev environment).
+#
+# workspace:
+#   root: ~/.maverick/workspaces    # Base directory for cloned workspaces
+#   setup: "uv sync"               # Shell command after cloning
+#   teardown: null                  # Shell command before teardown
+#   reuse: true                    # Reuse existing workspace if present
+#   env_files: [.env]              # Files copied from user repo into workspace
+
+# -- Notifications -------------------------------------------------------------
+# Push notifications via ntfy (https://ntfy.sh).
 notifications:
   enabled: false
+  # server: https://ntfy.sh        # ntfy server URL (default: https://ntfy.sh)
+  # topic: my-maverick-notifications  # Required when enabled
+
+# -- Parallelism ---------------------------------------------------------------
+# Concurrency limits for agent and task execution.
 parallel:
-  max_agents: 3
-  max_tasks: 5
+  max_agents: 3                     # Concurrent agent processes (1–10)
+  max_tasks: 5                      # Concurrent tasks per agent (1–20)
+
+# -- Session Logging -----------------------------------------------------------
+# Write a structured JSON journal of all workflow events.
+#
+# session_log:
+#   enabled: false                  # Enable by default (or use --session-log flag)
+#   output_dir: .maverick/logs      # Directory for log files
+#   include_agent_text: true        # Include raw agent stream chunks
+
+# -- TUI Metrics ---------------------------------------------------------------
+# Widget performance metrics for the TUI (opt-in).
+#
+# tui_metrics:
+#   enabled: false
+#   max_entries: 10000              # Rolling window size (100–1000000)
+
+# -- Verbosity -----------------------------------------------------------------
+# Log level for CLI output: error | warning | info | debug
 verbosity: warning
