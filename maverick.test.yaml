@@ -149,6 +149,14 @@ steps:
     provider: claude
     model_id: default
 
+  # --- Tier 3b: Decomposer (two-pass: outline → detail batches) ---
+  decompose_outline:
+    provider: claude
+    model_id: opus                     # Architectural reasoning for work breakdown
+  decompose_detail:
+    provider: copilot
+    model_id: gpt-5.3-codex            # Mechanical: fill instructions & criteria
+
   # --- Tier 4: Curator → Copilot free model ---
   curate:
     provider: copilot
