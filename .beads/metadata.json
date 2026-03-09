@@ -2,5 +2,6 @@
   "database": "dolt",
   "backend": "dolt",
   "dolt_mode": "server",
-  "dolt_database": "beads_sample-maverick-project"
+  "dolt_database": "beads_sample-maverick-project",
+  "project_id": "576757aa-3483-4f8d-8e6e-911a4e86a996"
 }
