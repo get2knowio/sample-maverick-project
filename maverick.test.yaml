@@ -39,7 +39,7 @@ github:
 agent_providers:
   claude:
     default: true
-    default_model: claude-sonnet-4-6
+    default_model: sonnet
     permission_mode: auto_approve
   copilot:
     default: false
@@ -65,18 +65,18 @@ model:
 # Example:
 #   agents:
 #     implementer:
-#       model_id: claude-opus-4-6      # Use Opus for implementation
+#       model_id: opus                 # Use Opus for implementation
 #       max_tokens: 64000
 #       temperature: 0.0
 #     unified_reviewer:
-#       model_id: claude-haiku-4-5     # Use Haiku for faster reviews
+#       model_id: haiku                # Use Haiku for faster reviews
 #       temperature: 0.2
 agents:
   # Planning agents — Opus for critical architectural reasoning
   decomposer:
-    model_id: claude-opus-4-6
+    model_id: opus
   flight_plan_generator:
-    model_id: claude-opus-4-6
+    model_id: opus
 
 # -- Per-Step Overrides --------------------------------------------------------
 # Override execution settings for individual workflow steps.
@@ -113,7 +113,7 @@ steps:
     model_id: gpt-5.4                  # Requirements coverage, 1x cost
   correctness_review:
     provider: claude
-    model_id: claude-sonnet-4-6        # Technical precision on Claude
+    model_id: sonnet                   # Technical precision on Claude
 
   # --- Tier 2: Targeted fixers → Copilot cheap models ---
   fix:
@@ -130,10 +130,10 @@ steps:
     model_id: gemini-3.1-pro-preview
   criteria_writer:
     provider: claude
-    model_id: claude-sonnet-4-6        # Precision for measurable criteria
+    model_id: sonnet                   # Precision for measurable criteria
   preflight_contrarian:
     provider: claude
-    model_id: claude-sonnet-4-6        # Devil's advocate reasoning
+    model_id: sonnet                   # Devil's advocate reasoning
 
   # Refuel Maverick briefing room
   navigator:
@@ -147,7 +147,7 @@ steps:
     model_id: gemini-3.1-pro-preview   # Risk scanning across codebase
   contrarian:
     provider: claude
-    model_id: claude-sonnet-4-6
+    model_id: sonnet
 
   # --- Tier 4: Curator → Copilot free model ---
   curate:
