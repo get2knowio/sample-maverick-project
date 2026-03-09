@@ -36,7 +36,7 @@ WU_COUNT=$(find "${PLAN_DIR}" -name "[0-9][0-9][0-9]-*.md" 2>/dev/null | wc -l)
 echo "  Work unit files: ${WU_COUNT}"
 [[ "${WU_COUNT}" -ge 1 ]] || { echo "FAIL: No work unit files"; exit 1; }
 
-BEADS_JSON=$(bd list --json)
+BEADS_JSON=$(bd list --flat --json)
 EPIC_COUNT=$(echo "${BEADS_JSON}" | jq '[.[] | select(.issue_type == "epic")] | length')
 TASK_COUNT=$(echo "${BEADS_JSON}" | jq '[.[] | select(.issue_type == "task")] | length')
 echo "  Epics: ${EPIC_COUNT}, Tasks: ${TASK_COUNT}"
