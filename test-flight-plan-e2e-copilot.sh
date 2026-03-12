@@ -67,6 +67,20 @@ echo "  Closed beads: ${CLOSED_COUNT}"
 
 ${MAVERICK} workspace status
 
+# ── Phase 4b: Verify runway data was recorded ────────────────
+echo ""
+echo "=== Phase 4b: Verify runway recording ==="
+PROJECT_NAME=$(basename "${REPO_ROOT}")
+WORKSPACE_RUNWAY="${HOME}/.maverick/workspaces/${PROJECT_NAME}/.maverick/runway"
+if [[ -d "${WORKSPACE_RUNWAY}" ]]; then
+  echo "  Runway directory exists at ${WORKSPACE_RUNWAY}"
+  OUTCOME_LINES=$(wc -l < "${WORKSPACE_RUNWAY}/episodic/bead-outcomes.jsonl" 2>/dev/null || echo 0)
+  echo "  Bead outcome records: ${OUTCOME_LINES}"
+  [[ "${OUTCOME_LINES}" -ge 1 ]] || echo "  WARN: No bead outcomes recorded (best-effort, non-fatal)"
+else
+  echo "  WARN: Runway not found in workspace (best-effort, non-fatal)"
+fi
+
 # ── Phase 5: Land — push changes ────────────────────────────
 echo ""
 echo "=== Phase 5: Land ==="
