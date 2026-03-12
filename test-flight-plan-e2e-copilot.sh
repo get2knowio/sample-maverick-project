@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Shared setup: reset repo, copy .env, maverick init
+# Shared setup: reset repo, maverick init
 source "$(dirname "${BASH_SOURCE[0]}")/scripts/test-setup.sh"
 
 # Use copilot provider config
