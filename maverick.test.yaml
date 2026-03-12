@@ -39,7 +39,7 @@ github:
 agent_providers:
   claude:
     default: true
-    default_model: default
+    default_model: sonnet
     permission_mode: auto_approve
   copilot:
     default: false
@@ -54,7 +54,7 @@ agent_providers:
 # Global model settings. Applied to all agent steps unless overridden by
 # per-step (steps:) or per-agent (agents:) config.
 model:
-  model_id: default                    # Default model for all agent steps
+  model_id: sonnet                     # Default model for all agent steps
   max_tokens: 64000                    # Max OUTPUT tokens per response (1–200000)
   temperature: 0.0                     # Sampling temperature (0.0–1.0)
 
@@ -113,7 +113,7 @@ steps:
     model_id: gpt-5.4                  # Requirements coverage, 1x cost
   correctness_review:
     provider: claude
-    model_id: default                  # Technical precision on Claude
+    model_id: sonnet                   # Technical precision on Claude
 
   # --- Tier 2: Targeted fixers → Copilot cheap models ---
   fix:
@@ -130,10 +130,10 @@ steps:
     model_id: gemini-3.1-pro-preview
   criteria_writer:
     provider: claude
-    model_id: default                  # Precision for measurable criteria
+    model_id: sonnet                   # Precision for measurable criteria
   preflight_contrarian:
     provider: claude
-    model_id: default                  # Devil's advocate reasoning
+    model_id: sonnet                   # Devil's advocate reasoning
 
   # Refuel Maverick briefing room
   navigator:
@@ -147,7 +147,7 @@ steps:
     model_id: gemini-3.1-pro-preview   # Risk scanning across codebase
   contrarian:
     provider: claude
-    model_id: default
+    model_id: sonnet
 
   # --- Tier 3b: Decomposer (two-pass: outline → detail batches) ---
   decompose_outline:
