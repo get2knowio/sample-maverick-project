@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "greet"
+version = "0.1.0"
+description = "Multilingual Hello, World! greetings with ASCII art"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.0",
+    "rich>=13.0",
+    "pyfiglet>=1.0",
+]
+
+[project.scripts]
+greet = "greet.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/greet"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "mypy>=1.0",
+    "ruff>=0.4",
+]
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+
+[tool.ruff]
+src = ["src"]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
