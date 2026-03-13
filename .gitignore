@@ -210,5 +210,6 @@ __marimo__/
 .dolt/
 *.db
 
-# Maverick local state
-.maverick/
+# Maverick workspace marker (local-only; the .maverick/ directory itself
+# is committed so that runway knowledge and plans are shared with the team)
+.maverick-workspace.json
