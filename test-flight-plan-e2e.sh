@@ -85,5 +85,22 @@ echo "=== Phase 5: Land ==="
 git fetch origin
 git log origin/main --oneline -5
 
+# ── Phase 5b: Verify runway consolidation ran ────────────────
+echo ""
+echo "=== Phase 5b: Verify runway consolidation ==="
+USER_RUNWAY="${REPO_ROOT}/.maverick/runway"
+if [[ -d "${USER_RUNWAY}/semantic" ]]; then
+  INSIGHTS="${USER_RUNWAY}/semantic/consolidated-insights.md"
+  if [[ -f "${INSIGHTS}" ]]; then
+    INSIGHTS_SIZE=$(wc -c < "${INSIGHTS}")
+    echo "  consolidated-insights.md exists (${INSIGHTS_SIZE} bytes)"
+    [[ "${INSIGHTS_SIZE}" -gt 0 ]] || echo "  WARN: Insights file is empty"
+  else
+    echo "  WARN: consolidated-insights.md not found (consolidation may have been skipped)"
+  fi
+else
+  echo "  WARN: No semantic directory in user runway (consolidation may not have synced)"
+fi
+
 echo ""
 echo "=== All flight-plan e2e verifications passed ==="
