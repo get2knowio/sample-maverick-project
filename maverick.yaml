@@ -1,0 +1,66 @@
+project_type: python
+github:
+  owner: get2knowio
+  repo: sample-maverick-project
+  default_branch: main
+validation:
+  sync_cmd:
+  - uv
+  - sync
+  format_cmd:
+  - ruff
+  - format
+  - .
+  lint_cmd:
+  - ruff
+  - check
+  - --fix
+  - .
+  typecheck_cmd:
+  - mypy
+  - .
+  test_cmd:
+  - pytest
+  - -x
+  - --tb=short
+  timeout_seconds: 300
+  max_errors: 50
+notifications:
+  enabled: false
+parallel:
+  max_agents: 3
+  max_tasks: 5
+  decomposer_pool_size: 3
+  max_briefing_agents: 3
+  max_parallel_reviewers: 2
+# Per-role airframe bindings. Each role pins one (provider, model_id);
+# the squadron constructs an airframe AgentRuntime per role at workflow
+# startup. Per-complexity overrides go under
+# actors.<workflow>.<actor>.tiers.<complexity>. Provider IDs are
+# airframe-canonical — see `airframe.list_providers()` for the live set.
+#
+# Every role is pinned to `claude` so the whole PRD -> plan -> refuel ->
+# fly walkthrough runs on a single credential. The multi-provider spread
+# this file used to carry (copilot review, opencode-go briefing, opencode
+# decompose, openrouter generate) exercised more of the adapter surface,
+# but a walkthrough that needs four separate logins is a walkthrough
+# nobody runs — and four of the five had no credential at all, so refuel
+# died at the first briefing. Recover that version from git history if
+# you specifically want to test multi-provider routing.
+agents:
+  implement:
+    provider: claude
+    model_id: claude-sonnet-4-6
+  review:
+    provider: claude
+    model_id: claude-sonnet-4-6
+  briefing:
+    provider: claude
+    model_id: claude-haiku-4-5-20251001
+  decompose:
+    provider: claude
+    model_id: claude-sonnet-4-6
+  generate:
+    provider: claude
+    model_id: claude-sonnet-4-6
+verbosity: warning
